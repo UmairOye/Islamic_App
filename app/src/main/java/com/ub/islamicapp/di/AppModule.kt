@@ -33,7 +33,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providePrayerRepository(): PrayerRepository {
-        return PrayerRepositoryImpl()
+    fun providePrayerRepository(application: Application): PrayerRepository {
+        return PrayerRepositoryImpl(application)
     }
 }
