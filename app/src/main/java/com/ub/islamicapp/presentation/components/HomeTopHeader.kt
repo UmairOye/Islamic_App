@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.rounded.LocationOff
 import com.ub.islamicapp.presentation.state.PrayerTime
 
 @Composable
@@ -24,6 +25,7 @@ fun HomeTopHeader(
     timeRemaining: String,
     prayers: List<PrayerTime>,
     nextPrayer: String,
+    isLocationError: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -47,11 +49,28 @@ fun HomeTopHeader(
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = location,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.8f)
-                )
+                if (isLocationError) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.LocationOff,
+                            contentDescription = "Location Off",
+                            tint = Color.White.copy(alpha = 0.8f),
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Turn on GPS to fetch prayer times",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White.copy(alpha = 0.8f)
+                        )
+                    }
+                } else {
+                    Text(
+                        text = location,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
+                }
             }
             IconButton(onClick = { /*TODO*/ }) {
                 Icon(
@@ -74,15 +93,37 @@ fun HomeTopHeader(
             color = Color.White
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = timeRemaining,
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.White.copy(alpha = 0.9f)
-        )
+
+        if (isLocationError) {
+             Text(
+                text = "GPS required for times",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White.copy(alpha = 0.9f)
+            )
+        } else {
+             Text(
+                text = timeRemaining,
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White.copy(alpha = 0.9f)
+            )
+        }
 
         Spacer(modifier = Modifier.height(56.dp))
 
         // Prayer Times Row
-        PrayerTimesRow(prayers = prayers, nextPrayer = nextPrayer)
+        if (isLocationError || prayers.isEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Shimmer / Placeholder style for prayer items
+                val placeholderNames = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+                placeholderNames.forEach { name ->
+                    PrayerItem(prayer = PrayerTime(name, "--:--", false), isNext = false)
+                }
+            }
+        } else {
+            PrayerTimesRow(prayers = prayers, nextPrayer = nextPrayer)
+        }
     }
 }
