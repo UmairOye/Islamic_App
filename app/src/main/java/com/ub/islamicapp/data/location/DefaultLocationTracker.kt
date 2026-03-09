@@ -17,6 +17,8 @@ class DefaultLocationTracker @Inject constructor(
     private val application: Application
 ) : LocationTracker {
 
+    private val sharedPreferences = application.getSharedPreferences("location_prefs", Context.MODE_PRIVATE)
+
     override suspend fun getCurrentLocation(): Location? {
         val hasAccessFineLocationPermission = ContextCompat.checkSelfPermission(
             application,
@@ -31,30 +33,53 @@ class DefaultLocationTracker @Inject constructor(
         val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
-        if (!hasAccessCoarseLocationPermission || !hasAccessFineLocationPermission || !isGpsEnabled) {
-            return null
-        }
+        val canUseGps = hasAccessCoarseLocationPermission && hasAccessFineLocationPermission && isGpsEnabled
 
-        return suspendCancellableCoroutine { cont ->
-            locationClient.lastLocation.apply {
-                if (isComplete) {
-                    if (isSuccessful) {
-                        cont.resume(result)
-                    } else {
+        if (canUseGps) {
+            val location = suspendCancellableCoroutine<Location?> { cont ->
+                locationClient.lastLocation.apply {
+                    if (isComplete) {
+                        if (isSuccessful) {
+                            cont.resume(result)
+                        } else {
+                            cont.resume(null)
+                        }
+                        return@suspendCancellableCoroutine
+                    }
+                    addOnSuccessListener {
+                        cont.resume(it)
+                    }
+                    addOnFailureListener {
                         cont.resume(null)
                     }
-                    return@suspendCancellableCoroutine
-                }
-                addOnSuccessListener {
-                    cont.resume(it)
-                }
-                addOnFailureListener {
-                    cont.resume(null)
-                }
-                addOnCanceledListener {
-                    cont.cancel()
+                    addOnCanceledListener {
+                        cont.cancel()
+                    }
                 }
             }
+
+            if (location != null) {
+                // Save to cache
+                sharedPreferences.edit().apply {
+                    putString("cached_lat", location.latitude.toString())
+                    putString("cached_lng", location.longitude.toString())
+                    apply()
+                }
+                return location
+            }
         }
+
+        // Return from cache if GPS fails or is disabled
+        val cachedLatStr = sharedPreferences.getString("cached_lat", null)
+        val cachedLngStr = sharedPreferences.getString("cached_lng", null)
+
+        if (cachedLatStr != null && cachedLngStr != null) {
+            return Location("cached").apply {
+                latitude = cachedLatStr.toDouble()
+                longitude = cachedLngStr.toDouble()
+            }
+        }
+
+        return null
     }
 }
