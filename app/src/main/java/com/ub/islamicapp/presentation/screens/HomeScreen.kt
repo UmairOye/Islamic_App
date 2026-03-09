@@ -111,7 +111,6 @@ fun HomeScreen(
                 val headerHeightDp = with(density) { headerHeightPx.toDp() }
                 Spacer(modifier = Modifier.height(headerHeightDp))
                 
-                // Bottom Sheet Section overlapping
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
