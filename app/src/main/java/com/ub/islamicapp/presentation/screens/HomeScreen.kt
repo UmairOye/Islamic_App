@@ -84,6 +84,7 @@ fun HomeScreen(
                 timeRemaining = uiState.timeRemaining,
                 prayers = uiState.prayerTimes,
                 nextPrayer = uiState.nextPrayer,
+                isLocationError = uiState.error == "NO_LOCATION" || uiState.error != null,
                 modifier = Modifier
                     .onSizeChanged { headerHeightPx = it.height }
                     .graphicsLayer {
@@ -134,7 +135,9 @@ fun HomeScreen(
                         onContinueClick = { /* Handle click */ }
                     )
                     
-                    PrayerTracker(prayers = uiState.prayerTimes)
+                    if (uiState.error != "NO_LOCATION" && uiState.prayerTimes.isNotEmpty()) {
+                        PrayerTracker(prayers = uiState.prayerTimes)
+                    }
                     
                     Spacer(modifier = Modifier.height(32.dp))
                 }
