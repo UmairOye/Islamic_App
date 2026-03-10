@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.ub.islamicapp.theme.PrimaryGreen
 import com.ub.islamicapp.utils.CalendarUtils
 import com.ub.islamicapp.utils.MonthData
+import com.ub.islamicapp.utils.IslamicEventsProvider
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
 fun CalendarView(
@@ -32,11 +34,22 @@ fun CalendarView(
     modifier: Modifier = Modifier
 ) {
     var monthOffset by remember { mutableIntStateOf(0) }
+    var selectedDay by remember { mutableIntStateOf(-1) }
 
     val monthData = if (isHijri) {
         CalendarUtils.getHijriMonthData(monthOffset)
     } else {
         CalendarUtils.getGregorianMonthData(monthOffset)
+    }
+
+    // Automatically select "today" if in current month, otherwise 1st of month
+    LaunchedEffect(monthData) {
+        val todayCell = monthData.days.find { it.isToday }
+        if (todayCell != null) {
+            selectedDay = todayCell.dayOfMonth
+        } else {
+            selectedDay = 1
+        }
     }
 
     Column(modifier = modifier.fillMaxWidth().padding(16.dp)) {
@@ -86,23 +99,52 @@ fun CalendarView(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(monthData.days) { day ->
+                val isSelected = (day.dayOfMonth == selectedDay)
+                val bgColor = if (isSelected) PrimaryGreen else if (day.isToday) PrimaryGreen.copy(alpha = 0.3f) else if (day.dayOfMonth > 0) Color.LightGray.copy(alpha = 0.2f) else Color.Transparent
+                val txtColor = if (isSelected) Color.White else if (day.isToday) PrimaryGreen else Color.Black
+
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .aspectRatio(1f)
                         .clip(CircleShape)
-                        .background(
-                            color = if (day.isToday) PrimaryGreen else if (day.dayOfMonth > 0) Color.LightGray.copy(alpha = 0.2f) else Color.Transparent
-                        )
-                        .clickable(enabled = day.dayOfMonth > 0) { /* Handle selection if needed */ }
+                        .background(bgColor)
+                        .clickable(enabled = day.dayOfMonth > 0) {
+                            selectedDay = day.dayOfMonth
+                        }
                 ) {
                     if (day.dayOfMonth > 0) {
                         Text(
                             text = day.dayOfMonth.toString(),
-                            color = if (day.isToday) Color.White else Color.Black,
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = if (day.isToday) FontWeight.Bold else FontWeight.Normal)
+                            color = txtColor,
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = if (isSelected || day.isToday) FontWeight.Bold else FontWeight.Normal)
                         )
                     }
+                }
+            }
+        }
+
+        // Event Card (If Hijri and selected)
+        if (isHijri && selectedDay > 0) {
+            Spacer(modifier = Modifier.height(32.dp))
+            val eventDesc = IslamicEventsProvider.getEventForDate(monthData.monthIndex, selectedDay)
+
+            androidx.compose.material3.Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = PrimaryGreen.copy(alpha = 0.1f)),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Historical Event - $selectedDay ${monthData.monthName}",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = PrimaryGreen)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = eventDesc ?: "No major historical events recorded on this date.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.DarkGray
+                    )
                 }
             }
         }
