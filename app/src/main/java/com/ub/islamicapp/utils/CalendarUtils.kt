@@ -12,6 +12,7 @@ data class CalendarDay(
 
 data class MonthData(
     val monthName: String,
+    val monthIndex: Int,
     val year: Int,
     val days: List<CalendarDay>
 )
@@ -56,6 +57,7 @@ object CalendarUtils {
 
         return MonthData(
             monthName = monthNames[targetMonth],
+            monthIndex = targetMonth,
             year = targetYear,
             days = days
         )
@@ -100,11 +102,12 @@ object CalendarUtils {
 
             return MonthData(
                 monthName = monthNames[targetMonth],
+                monthIndex = targetMonth,
                 year = targetYear,
                 days = days
             )
         } else {
-            return MonthData("Unknown", 1445, emptyList())
+            return MonthData("Unknown", 0, 1445, emptyList())
         }
     }
 }
