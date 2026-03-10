@@ -28,6 +28,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.ub.islamicapp.presentation.components.*
 import com.ub.islamicapp.presentation.viewmodel.HomeViewModel
 import com.ub.islamicapp.theme.PrimaryGreen
@@ -35,6 +36,7 @@ import com.ub.islamicapp.theme.LightBackground
 
 @Composable
 fun HomeScreen(
+    navController: NavController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -127,6 +129,34 @@ fun HomeScreen(
                         .padding(vertical = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(32.dp)
                 ) {
+                    // Navigation Buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        androidx.compose.material3.Button(
+                            onClick = { navController.navigate("hijri_calendar") },
+                            modifier = Modifier.weight(1f),
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                        ) {
+                            androidx.compose.material3.Text("Hijri")
+                        }
+                        androidx.compose.material3.Button(
+                            onClick = { navController.navigate("gregorian_calendar") },
+                            modifier = Modifier.weight(1f),
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                        ) {
+                            androidx.compose.material3.Text("Calendar")
+                        }
+                        androidx.compose.material3.Button(
+                            onClick = { navController.navigate("prayer_times") },
+                            modifier = Modifier.weight(1f),
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                        ) {
+                            androidx.compose.material3.Text("Salah")
+                        }
+                    }
+
                     FeatureGrid()
                     
                     LastReadCard(

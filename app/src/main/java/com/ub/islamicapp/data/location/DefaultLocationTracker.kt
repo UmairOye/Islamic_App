@@ -7,6 +7,8 @@ import android.location.Location
 import android.location.LocationManager
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.ub.islamicapp.data.datasource.LocationDao
+import com.ub.islamicapp.data.models.LocationEntity
 import com.ub.islamicapp.domain.location.LocationTracker
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
@@ -14,10 +16,9 @@ import kotlin.coroutines.resume
 
 class DefaultLocationTracker @Inject constructor(
     private val locationClient: FusedLocationProviderClient,
+    private val locationDao: LocationDao,
     private val application: Application
 ) : LocationTracker {
-
-    private val sharedPreferences = application.getSharedPreferences("location_prefs", Context.MODE_PRIVATE)
 
     override suspend fun getCurrentLocation(): Location? {
         val hasAccessFineLocationPermission = ContextCompat.checkSelfPermission(
@@ -59,24 +60,19 @@ class DefaultLocationTracker @Inject constructor(
             }
 
             if (location != null) {
-                // Save to cache
-                sharedPreferences.edit().apply {
-                    putString("cached_lat", location.latitude.toString())
-                    putString("cached_lng", location.longitude.toString())
-                    apply()
-                }
+                // Save to Room cache
+                locationDao.insertLocation(LocationEntity(latitude = location.latitude, longitude = location.longitude))
                 return location
             }
         }
 
         // Return from cache if GPS fails or is disabled
-        val cachedLatStr = sharedPreferences.getString("cached_lat", null)
-        val cachedLngStr = sharedPreferences.getString("cached_lng", null)
+        val cachedLocation = locationDao.getLastLocation()
 
-        if (cachedLatStr != null && cachedLngStr != null) {
+        if (cachedLocation != null) {
             return Location("cached").apply {
-                latitude = cachedLatStr.toDouble()
-                longitude = cachedLngStr.toDouble()
+                latitude = cachedLocation.latitude
+                longitude = cachedLocation.longitude
             }
         }
 
