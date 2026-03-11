@@ -37,7 +37,6 @@ fun PrayerTimesScreen(
             .fillMaxSize()
             .background(PrimaryGreen)
     ) {
-        // Top Section (Green Background)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -72,7 +71,6 @@ fun PrayerTimesScreen(
             )
         }
 
-        // Bottom Sheet Section (White Background)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -81,7 +79,6 @@ fun PrayerTimesScreen(
                 .padding(24.dp)
         ) {
             Column {
-                // Header Date Info
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -92,7 +89,7 @@ fun PrayerTimesScreen(
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Today", // Ideally formatted from current date
+                            text = "Today",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                         )
                         Text(
@@ -102,7 +99,7 @@ fun PrayerTimesScreen(
                         )
                     }
                     IconButton(onClick = { /* Next Day */ }) {
-                        Icon(Icons.Rounded.Notifications, contentDescription = "Next") // Temporary icon
+                        Icon(Icons.Rounded.Notifications, contentDescription = "Next")
                     }
                 }
 

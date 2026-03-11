@@ -70,15 +70,13 @@ fun HomeScreen(
     }
 
     Scaffold(
-        containerColor = PrimaryGreen, // The base color is green for the header
+        containerColor = PrimaryGreen,
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            
-            // Background Header Section with Parallax Effect
             HomeTopHeader(
                 hijriDate = uiState.hijriDate,
                 location = uiState.location,
@@ -90,27 +88,19 @@ fun HomeScreen(
                 modifier = Modifier
                     .onSizeChanged { headerHeightPx = it.height }
                     .graphicsLayer {
-                        // Premium Parallax Effect
-                        // Translate Header downwards slightly relative to scroll, giving a parallax depth effect
                         translationY = -scrollState.value * 0.2f
-                        
-                        // Fade out the header slightly as it goes up
                         alpha = 1f - (scrollState.value.toFloat() / (headerHeightPx * 1.5f)).coerceIn(0f, 1f)
-                        
-                        // Scale down very slightly
                         val scale = 1f - (scrollState.value.toFloat() / 3000f).coerceIn(0f, 0.05f)
                         scaleX = scale
                         scaleY = scale
                     }
             )
             
-            // Scrollable Content overlaying the header
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
             ) {
-                // Spacer matching the header's true height so content begins right below it
                 val headerHeightDp = with(density) { headerHeightPx.toDp() }
                 Spacer(modifier = Modifier.height(headerHeightDp))
                 
@@ -128,35 +118,12 @@ fun HomeScreen(
                         .padding(vertical = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(32.dp)
                 ) {
-                    // Navigation Buttons
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        androidx.compose.material3.Button(
-                            onClick = { navController.navigate("hijri_calendar") },
-                            modifier = Modifier.weight(1f),
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
-                        ) {
-                            androidx.compose.material3.Text("Hijri")
-                        }
-                        androidx.compose.material3.Button(
-                            onClick = { navController.navigate("gregorian_calendar") },
-                            modifier = Modifier.weight(1f),
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
-                        ) {
-                            androidx.compose.material3.Text("Calendar")
-                        }
-                        androidx.compose.material3.Button(
-                            onClick = { navController.navigate("prayer_times") },
-                            modifier = Modifier.weight(1f),
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
-                        ) {
-                            androidx.compose.material3.Text("Salah")
-                        }
-                    }
-
-                    FeatureGrid()
+                    FeatureGrid(
+                        onNavigateToHijri = { navController.navigate("hijri_calendar") },
+                        onNavigateToCalendar = { navController.navigate("gregorian_calendar") },
+                        onNavigateToSalah = { navController.navigate("prayer_times") },
+                        onNavigateToQibla = { navController.navigate("qibla") }
+                    )
                     
                     LastReadCard(
                         surah = uiState.lastReadSurah,

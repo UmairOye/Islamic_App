@@ -42,7 +42,6 @@ fun CalendarView(
         CalendarUtils.getGregorianMonthData(monthOffset)
     }
 
-    // Automatically select "today" if in current month, otherwise 1st of month
     LaunchedEffect(monthData) {
         val todayCell = monthData.days.find { it.isToday }
         if (todayCell != null) {
@@ -53,7 +52,6 @@ fun CalendarView(
     }
 
     Column(modifier = modifier.fillMaxWidth().padding(16.dp)) {
-        // Header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -73,7 +71,6 @@ fun CalendarView(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Days of Week Header
         val daysOfWeek = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -91,7 +88,6 @@ fun CalendarView(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Calendar Grid
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
             modifier = Modifier.fillMaxWidth(),
@@ -124,7 +120,6 @@ fun CalendarView(
             }
         }
 
-        // Event Card (If Hijri and selected)
         if (isHijri && selectedDay > 0) {
             Spacer(modifier = Modifier.height(32.dp))
             val eventDesc = IslamicEventsProvider.getEventForDate(monthData.monthIndex, selectedDay)
