@@ -25,16 +25,13 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.Canvas
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.rotate
-import kotlin.math.cos
-import kotlin.math.sin
+import com.ub.islamicapp.R
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -90,12 +87,24 @@ fun QiblaScreen(
             var lastAccelerometerSet = false
             var lastMagnetometerSet = false
 
+            // Low-pass filter constant (0.0 - 1.0)
+            // Smaller value = smoother but slower to update
+            val alpha = 0.05f
+
+            private fun lowPassFilter(input: FloatArray, output: FloatArray?): FloatArray {
+                if (output == null) return input
+                for (i in input.indices) {
+                    output[i] = output[i] + alpha * (input[i] - output[i])
+                }
+                return output
+            }
+
             override fun onSensorChanged(event: SensorEvent) {
                 if (event.sensor === accelerometer) {
-                    System.arraycopy(event.values, 0, lastAccelerometer, 0, event.values.size)
+                    lastAccelerometer = lowPassFilter(event.values.clone(), lastAccelerometer)
                     lastAccelerometerSet = true
                 } else if (event.sensor === magnetometer) {
-                    System.arraycopy(event.values, 0, lastMagnetometer, 0, event.values.size)
+                    lastMagnetometer = lowPassFilter(event.values.clone(), lastMagnetometer)
                     lastMagnetometerSet = true
                 }
 
@@ -105,8 +114,21 @@ fun QiblaScreen(
                         val orientation = FloatArray(3)
                         SensorManager.getOrientation(r, orientation)
                         val azimuthInRadians = orientation[0]
-                        val azimuthInDegrees = (Math.toDegrees(azimuthInRadians.toDouble()) + 360).toFloat() % 360
-                        azimuth = azimuthInDegrees
+
+                        var azimuthInDegrees = (Math.toDegrees(azimuthInRadians.toDouble()) + 360).toFloat() % 360
+
+                        // Additional smoothing specifically for the final degree output to avoid jitter
+                        // Using a simple threshold check (if change is very small, ignore it)
+                        if (Math.abs(azimuth - azimuthInDegrees) > 1.0f && Math.abs(azimuth - azimuthInDegrees) < 359.0f) {
+                            // Circular smoothing for the final angle
+                            val diff = azimuthInDegrees - azimuth
+                            if (diff > 180) azimuthInDegrees -= 360
+                            else if (diff < -180) azimuthInDegrees += 360
+
+                            azimuth = (azimuth + 0.1f * (azimuthInDegrees - azimuth))
+                            if (azimuth < 0) azimuth += 360f
+                            if (azimuth >= 360f) azimuth -= 360f
+                        }
                     }
                 }
             }
@@ -191,96 +213,66 @@ fun QiblaScreen(
 
                 Spacer(modifier = Modifier.height(48.dp))
 
-                // Neumorphic compass design
+                // Compass design using provided assets
                 Box(
                     modifier = Modifier
-                        .size(320.dp)
-                        .shadow(elevation = 20.dp, shape = CircleShape, spotColor = Color.LightGray.copy(alpha = 0.5f))
-                        .clip(CircleShape)
-                        .background(Color.White),
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .background(Color.Transparent),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Outer ticking and rotating cardinal text
+                    // Outer static ring (Shadow/Background)
+                    Image(
+                        painter = painterResource(id = R.drawable.qibla_outer_ring_2),
+                        contentDescription = "Compass Background",
+                        modifier = Modifier.fillMaxSize(0.9f)
+                    )
+
+                    // Outer ticking ring (Rotating)
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
+                            .fillMaxSize(0.85f)
                             .rotate(animatedRotation),
                         contentAlignment = Alignment.Center
                     ) {
-                        Canvas(modifier = Modifier.fillMaxSize()) {
-                            val radius = size.minDimension / 2f
-                            val center = Offset(size.width / 2f, size.height / 2f)
-
-                            // Draw ticks
-                            for (i in 0 until 360 step 30) {
-                                val isCardinal = i % 90 == 0
-                                val tickLength = if (isCardinal) 16.dp.toPx() else 8.dp.toPx()
-                                val strokeWidth = if (isCardinal) 3.dp.toPx() else 1.5.dp.toPx()
-                                val color = if (i == 0) Color.Red else if (isCardinal) PrimaryGreen else Color.LightGray
-
-                                val angleRad = Math.toRadians(i.toDouble() - 90.0)
-                                val startRadius = radius - 24.dp.toPx()
-                                val endRadius = startRadius - tickLength
-
-                                val start = Offset(
-                                    (center.x + startRadius * cos(angleRad)).toFloat(),
-                                    (center.y + startRadius * sin(angleRad)).toFloat()
-                                )
-                                val end = Offset(
-                                    (center.x + endRadius * cos(angleRad)).toFloat(),
-                                    (center.y + endRadius * sin(angleRad)).toFloat()
-                                )
-
-                                drawLine(
-                                    color = color,
-                                    start = start,
-                                    end = end,
-                                    strokeWidth = strokeWidth,
-                                    cap = StrokeCap.Round
-                                )
-                            }
-                        }
-
-                        // Cardinal Directions Text
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Text("N", modifier = Modifier.align(Alignment.TopCenter).padding(16.dp), color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                            Text("E", modifier = Modifier.align(Alignment.CenterEnd).padding(16.dp), color = Color.DarkGray, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                            Text("S", modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp), color = Color.DarkGray, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                            Text("W", modifier = Modifier.align(Alignment.CenterStart).padding(16.dp), color = Color.DarkGray, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                        }
+                        Image(
+                            painter = painterResource(id = R.drawable.qibla_outer_ring_1),
+                            contentDescription = "Compass Outer Ring",
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
 
-                    // Qibla Dot Indicator on the track
+                    // Qibla Dot Indicator on the track (Rotating relative to Qibla)
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
+                            .fillMaxSize(0.85f)
                             .rotate(animatedQiblaRotation),
-                        contentAlignment = Alignment.CenterStart
+                        contentAlignment = Alignment.TopCenter
                     ) {
-                        Box(
+                        Image(
+                            painter = painterResource(id = R.drawable.qibla_reading),
+                            contentDescription = "Qibla Indicator",
                             modifier = Modifier
-                                .offset(x = 56.dp)
+                                .padding(top = 56.dp)
                                 .size(24.dp)
-                                .shadow(8.dp, CircleShape, spotColor = PrimaryGreen)
-                                .background(PrimaryGreen, CircleShape)
                         )
                     }
 
                     // Inner elevated circle with readout
                     Box(
                         modifier = Modifier
-                            .size(160.dp)
-                            .shadow(elevation = 16.dp, shape = CircleShape, spotColor = Color.LightGray.copy(alpha = 0.5f))
+                            .fillMaxSize(0.5f)
                             .clip(CircleShape)
-                            .background(Color.White),
+                            .background(Color.White)
+                            .shadow(elevation = 16.dp, shape = CircleShape, spotColor = Color.LightGray.copy(alpha = 0.5f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                             val displayAzimuth = (azimuth % 360).toInt()
                             Text(
                                 text = "$displayAzimuth°",
-                                style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold, fontSize = 48.sp),
-                                color = Color.DarkGray
+                                style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold, fontSize = 42.sp),
+                                color = Color(0xFF4A5568)
                             )
                             val cardinal = when (displayAzimuth) {
                                 in 338..359, in 0..22 -> "N"
