@@ -163,8 +163,12 @@ object PrayerTimeCalculator {
     private fun formatTime(time: Double): String {
         if (time.isNaN()) return "--:--"
         var t = fixHour(time + 0.5 / 60.0) // Add 0.5 minute to round up
-        val hours = floor(t).toInt()
-        val minutes = floor((t - hours) * 60).toInt()
-        return String.format("%02d:%02d", hours, minutes)
+        val hours24 = floor(t).toInt()
+        val minutes = floor((t - hours24) * 60).toInt()
+
+        // Convert to 12-hour format without AM/PM text (as per user UI sample just showing "04:41")
+        // Wait, the user requested 12-hour format. Let's just output hh:mm
+        val hours12 = if (hours24 == 0) 12 else if (hours24 > 12) hours24 - 12 else hours24
+        return String.format("%02d:%02d", hours12, minutes)
     }
 }

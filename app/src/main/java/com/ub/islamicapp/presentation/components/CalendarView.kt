@@ -122,8 +122,7 @@ fun CalendarView(
 
         if (isHijri && selectedDay > 0) {
             Spacer(modifier = Modifier.height(32.dp))
-            val eventsData by IslamicEventsProvider.eventsDataFlow.collectAsState()
-            val eventDesc = IslamicEventsProvider.getEventForDate(eventsData, monthData.monthIndex, selectedDay)
+            val eventDesc = IslamicEventsProvider.getEventForDate(monthData.monthIndex, selectedDay)
 
             androidx.compose.material3.Card(
                 modifier = Modifier.fillMaxWidth(),

@@ -114,7 +114,6 @@ fun QiblaScreen(
                         val orientation = FloatArray(3)
                         SensorManager.getOrientation(r, orientation)
                         val azimuthInRadians = orientation[0]
-
                         var azimuthInDegrees = (Math.toDegrees(azimuthInRadians.toDouble()) + 360).toFloat() % 360
 
                         // Additional smoothing specifically for the final degree output to avoid jitter
