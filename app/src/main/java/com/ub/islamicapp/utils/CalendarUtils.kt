@@ -1,8 +1,6 @@
 package com.ub.islamicapp.utils
 
-import android.icu.util.Calendar
 import android.icu.util.IslamicCalendar
-import java.util.Locale
 
 data class CalendarDay(
     val dayOfMonth: Int,
