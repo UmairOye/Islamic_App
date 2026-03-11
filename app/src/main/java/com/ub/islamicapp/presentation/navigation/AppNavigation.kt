@@ -24,5 +24,8 @@ fun AppNavigation() {
         composable("prayer_times") {
             com.ub.islamicapp.presentation.screens.PrayerTimesScreen(navController = navController)
         }
+        composable("qibla") {
+            com.ub.islamicapp.presentation.screens.QiblaScreen(navController = navController)
+        }
     }
 }

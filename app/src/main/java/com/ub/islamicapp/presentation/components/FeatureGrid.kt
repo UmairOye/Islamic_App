@@ -17,7 +17,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun FeatureGrid(modifier: Modifier = Modifier) {
+fun FeatureGrid(
+    modifier: Modifier = Modifier,
+    onNavigateToHijri: () -> Unit = {},
+    onNavigateToCalendar: () -> Unit = {},
+    onNavigateToSalah: () -> Unit = {},
+    onNavigateToQibla: () -> Unit = {}
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -35,8 +41,8 @@ fun FeatureGrid(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             FeatureItem(label = "Quran", icon = Icons.AutoMirrored.Rounded.MenuBook, onClick = { }, modifier = Modifier.weight(1f))
-            FeatureItem(label = "Hijri", icon = Icons.Rounded.DateRange, onClick = { }, modifier = Modifier.weight(1f))
-            FeatureItem(label = "Qibla", icon = Icons.Rounded.Explore, onClick = { }, modifier = Modifier.weight(1f))
+            FeatureItem(label = "Hijri", icon = Icons.Rounded.DateRange, onClick = onNavigateToHijri, modifier = Modifier.weight(1f))
+            FeatureItem(label = "Qibla", icon = Icons.Rounded.Explore, onClick = onNavigateToQibla, modifier = Modifier.weight(1f))
             FeatureItem(label = "Tasbeeh", icon = Icons.Rounded.FiberManualRecord, onClick = { }, modifier = Modifier.weight(1f))
         }
         
@@ -44,10 +50,10 @@ fun FeatureGrid(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            FeatureItem(label = "Calendar", icon = Icons.Rounded.CalendarMonth, onClick = { }, modifier = Modifier.weight(1f))
+            FeatureItem(label = "Calendar", icon = Icons.Rounded.CalendarMonth, onClick = onNavigateToCalendar, modifier = Modifier.weight(1f))
             FeatureItem(label = "Dua", icon = Icons.Rounded.WavingHand, onClick = { }, modifier = Modifier.weight(1f))
             FeatureItem(label = "Hadith", icon = Icons.AutoMirrored.Rounded.MenuBook, onClick = { }, modifier = Modifier.weight(1f))
-            FeatureItem(label = "Salah", icon = Icons.Rounded.AccessTime, onClick = { }, modifier = Modifier.weight(1f))
+            FeatureItem(label = "Salah", icon = Icons.Rounded.AccessTime, onClick = onNavigateToSalah, modifier = Modifier.weight(1f))
         }
     }
 }
