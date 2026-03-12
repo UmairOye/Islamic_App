@@ -115,9 +115,19 @@ fun HomeScreen(
                         )
                         .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
                         .background(LightBackground)
-                        .padding(vertical = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(32.dp)
+                        .padding(bottom = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(32.dp),
+                    horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
                 ) {
+                    // Docker Handle / Notch
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 12.dp, bottom = 8.dp)
+                            .size(width = 48.dp, height = 6.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(PrimaryGreen.copy(alpha = 0.3f))
+                    )
+
                     FeatureGrid(
                         onNavigateToHijri = { navController.navigate("hijri_calendar") },
                         onNavigateToCalendar = { navController.navigate("gregorian_calendar") },
