@@ -2,9 +2,24 @@ package com.ub.islamicapp.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.ub.islamicapp.R
+
+//fonts
+
+val InterDisplay = listOf<FontFamily>(
+        FontFamily(Font(R.font.inter_bold, FontWeight.Bold)),
+        FontFamily(Font(R.font.inter_semibold, FontWeight.SemiBold)),
+        FontFamily(Font(R.font.inter_medium, FontWeight.Medium)),
+        FontFamily(Font(R.font.inter_regular, FontWeight.Normal)),
+        FontFamily(Font(R.font.inter_extrabold, FontWeight.ExtraBold))
+        )
+
+
+
 
 // Set of Material typography styles to start with
 val Typography = Typography(
