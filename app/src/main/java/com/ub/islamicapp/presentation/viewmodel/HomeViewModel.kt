@@ -61,7 +61,7 @@ class HomeViewModel @Inject constructor(
                 )
             } else {
                 // If location doesn't exist at all, update the current system time anyway
-                val currentTimeStr = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Calendar.getInstance().time)
+                val currentTimeStr = java.text.SimpleDateFormat("hh:mm", java.util.Locale.getDefault()).format(java.util.Calendar.getInstance().time)
                 val hijriStr = try {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                         val islamicCalendar = android.icu.util.IslamicCalendar()
@@ -108,7 +108,7 @@ class HomeViewModel @Inject constructor(
                     )
                 } else {
                     // Update system time if no location
-                    val currentTimeStr = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Calendar.getInstance().time)
+                    val currentTimeStr = java.text.SimpleDateFormat("hh:mm", java.util.Locale.getDefault()).format(java.util.Calendar.getInstance().time)
                     _uiState.value = _uiState.value.copy(currentTime = currentTimeStr)
                 }
                 delay(60_000) // Poll every 1 minute

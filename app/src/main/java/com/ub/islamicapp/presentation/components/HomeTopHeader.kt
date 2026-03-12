@@ -11,10 +11,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.rounded.LocationOff
+import com.ub.islamicapp.R
 import com.ub.islamicapp.presentation.state.PrayerTime
 
 @Composable
@@ -28,14 +32,26 @@ fun HomeTopHeader(
     isLocationError: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Top Row (Date, Location, Bell)
-        Row(
+    Box(modifier = modifier.fillMaxWidth()) {
+        // Mosque Background
+        Image(
+            painter = painterResource(id = R.drawable.ic_mosque_silhouette),
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 32.dp)
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Top Row (Date, Location, Bell)
+            Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
@@ -125,5 +141,6 @@ fun HomeTopHeader(
         } else {
             PrayerTimesRow(prayers = prayers, nextPrayer = nextPrayer)
         }
+    }
     }
 }

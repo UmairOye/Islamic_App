@@ -6,8 +6,6 @@ import com.google.gson.reflect.TypeToken
 import com.ub.islamicapp.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.InputStreamReader
 
@@ -25,19 +23,17 @@ object IslamicEventsProvider {
         val Waqiat: List<EventDetail>?
     )
 
-    private val _eventsDataFlow = MutableStateFlow<Map<String, List<EventCategory>>?>(null)
-    val eventsDataFlow: StateFlow<Map<String, List<EventCategory>>?> = _eventsDataFlow
+    private var eventsData: Map<String, List<EventCategory>>? = null
 
     fun init(context: Context) {
-        if (_eventsDataFlow.value == null) {
+        if (eventsData == null) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val inputStream = context.resources.openRawResource(R.raw.islamic_calendar)
                     val reader = InputStreamReader(inputStream)
                     val type = object : TypeToken<Map<String, List<EventCategory>>>() {}.type
-                    val parsedData: Map<String, List<EventCategory>> = Gson().fromJson(reader, type)
+                    eventsData = Gson().fromJson(reader, type)
                     reader.close()
-                    _eventsDataFlow.value = parsedData
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -46,12 +42,12 @@ object IslamicEventsProvider {
     }
 
     /**
-     * Gets an event description for a given month and day from the provided data.
+     * Gets an event description for a given month and day.
      * monthIndex is 0-based: 0 = Muharram, ..., 11 = Dhu al-Hijjah
      */
-    fun getEventForDate(data: Map<String, List<EventCategory>>?, monthIndex: Int, day: Int): String? {
+    fun getEventForDate(monthIndex: Int, day: Int): String? {
         val monthKey = (monthIndex + 1).toString()
-        val categories = data?.get(monthKey) ?: return null
+        val categories = eventsData?.get(monthKey) ?: return null
 
         for (category in categories) {
             // Priority to Waqiat (Events) matching the day exactly
