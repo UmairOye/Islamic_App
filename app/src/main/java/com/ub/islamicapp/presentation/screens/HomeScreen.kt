@@ -128,7 +128,7 @@ fun HomeScreen(
                     LastReadCard(
                         surah = uiState.lastReadSurah,
                         verse = uiState.lastReadVerse,
-                        onContinueClick = { /* Handle click */ }
+                        onContinueClick = {  }
                     )
                     
                     if (uiState.error != "NO_LOCATION" && uiState.prayerTimes.isNotEmpty()) {
