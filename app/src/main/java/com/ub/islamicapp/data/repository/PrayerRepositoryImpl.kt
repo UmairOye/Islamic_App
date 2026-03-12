@@ -64,9 +64,9 @@ class PrayerRepositoryImpl @Inject constructor(
             }
         }
 
-        // Current time format
-        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val currentTimeStr = timeFormat.format(calendar.time)
+        // Current time format (keep domain logic internally consistent, format for UI later or alongside)
+        val timeFormat24 = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val currentTimeStr = timeFormat24.format(calendar.time)
 
         val prayerNamesOrder = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
         val prayers = mutableListOf<PrayerTime>()

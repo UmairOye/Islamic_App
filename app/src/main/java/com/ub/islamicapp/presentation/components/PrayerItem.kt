@@ -49,8 +49,21 @@ fun PrayerItem(
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.height(8.dp))
+
+        // Format to 12-hour for display
+        var displayTime = prayer.time
+        if (displayTime != "--:--") {
+            try {
+                val parts = displayTime.split(":")
+                val hour24 = parts[0].toInt()
+                val min = parts[1]
+                val hour12 = if (hour24 == 0) 12 else if (hour24 > 12) hour24 - 12 else hour24
+                displayTime = String.format("%02d:%s", hour12, min)
+            } catch (e: Exception) {}
+        }
+
         Text(
-            text = prayer.time,
+            text = displayTime,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = if (isNext) FontWeight.Bold else FontWeight.Normal
             ),
