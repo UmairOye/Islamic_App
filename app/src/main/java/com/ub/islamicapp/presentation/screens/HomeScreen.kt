@@ -77,56 +77,50 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            HomeTopHeader(
-                hijriDate = uiState.hijriDate,
-                location = uiState.location,
-                currentTime = uiState.currentTime,
-                timeRemaining = uiState.timeRemaining,
-                prayers = uiState.prayerTimes,
-                nextPrayer = uiState.nextPrayer,
-                isLocationError = uiState.error == "NO_LOCATION" || uiState.error != null,
-                modifier = Modifier
-                    .onSizeChanged { headerHeightPx = it.height }
-                    .graphicsLayer {
-                        translationY = -scrollState.value * 0.2f
-                        alpha = 1f - (scrollState.value.toFloat() / (headerHeightPx * 1.5f)).coerceIn(0f, 1f)
-                        val scale = 1f - (scrollState.value.toFloat() / 3000f).coerceIn(0f, 0.05f)
-                        scaleX = scale
-                        scaleY = scale
-                    }
-            )
-            
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
             ) {
-                val headerHeightDp = with(density) { headerHeightPx.toDp() }
-                Spacer(modifier = Modifier.height(headerHeightDp))
-                
+//                val headerHeightDp = with(density) { headerHeightPx.toDp() }
+//                Spacer(modifier = Modifier.height(headerHeightDp))
+
+
+                HomeTopHeader(
+                    hijriDate = uiState.hijriDate,
+                    location = uiState.location,
+                    currentTime = uiState.currentTime,
+                    timeRemaining = uiState.timeRemaining,
+                    prayers = uiState.prayerTimes,
+                    nextPrayer = uiState.nextPrayer,
+                    isLocationError = uiState.error == "NO_LOCATION" || uiState.error != null
+                )
+
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .shadow(
-                            elevation = 24.dp, 
-                            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                            spotColor = androidx.compose.ui.graphics.Color.Black,
-                            ambientColor = androidx.compose.ui.graphics.Color.Black
-                        )
-                        .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+//                        .shadow(
+//                            elevation = 24.dp,
+//                            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+//                            spotColor = androidx.compose.ui.graphics.Color.Black,
+//                            ambientColor = androidx.compose.ui.graphics.Color.Black
+//                        )
+//                        .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
                         .background(LightBackground)
                         .padding(bottom = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(32.dp),
                     horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
                 ) {
                     // Docker Handle / Notch
-                    Box(
-                        modifier = Modifier
-                            .padding(top = 12.dp, bottom = 8.dp)
-                            .size(width = 48.dp, height = 6.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(PrimaryGreen.copy(alpha = 0.3f))
-                    )
+//                    Box(
+//                        modifier = Modifier
+//                            .padding(top = 12.dp, bottom = 8.dp)
+//                            .size(width = 48.dp, height = 6.dp)
+//                            .clip(RoundedCornerShape(50))
+//                            .background(PrimaryGreen.copy(alpha = 0.3f))
+//                    )
 
                     FeatureGrid(
                         onNavigateToHijri = { navController.navigate("hijri_calendar") },

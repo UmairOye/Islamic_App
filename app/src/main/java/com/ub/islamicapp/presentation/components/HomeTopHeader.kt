@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.rounded.LocationOff
+import androidx.compose.ui.draw.alpha
 import com.ub.islamicapp.R
 import com.ub.islamicapp.presentation.state.PrayerTime
 
@@ -33,15 +34,13 @@ fun HomeTopHeader(
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
-        // Mosque Background
         Image(
-            painter = painterResource(id = R.drawable.ic_mosque_silhouette),
+            painter = painterResource(id = R.drawable.pngwing),
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp)
+                .align(Alignment.BottomCenter).alpha(0.1f)
         )
 
         Column(
@@ -50,7 +49,6 @@ fun HomeTopHeader(
                 .padding(top = 16.dp, bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Top Row (Date, Location, Bell)
             Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,18 +86,10 @@ fun HomeTopHeader(
                     )
                 }
             }
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    imageVector = Icons.Rounded.Notifications,
-                    contentDescription = "Notifications",
-                    tint = Color.White
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        // Large Clock
         Text(
             text = currentTime,
             style = MaterialTheme.typography.displayLarge.copy(
@@ -126,13 +116,11 @@ fun HomeTopHeader(
 
         Spacer(modifier = Modifier.height(56.dp))
 
-        // Prayer Times Row
         if (isLocationError || prayers.isEmpty()) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Shimmer / Placeholder style for prayer items
                 val placeholderNames = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
                 placeholderNames.forEach { name ->
                     PrayerItem(prayer = PrayerTime(name, "--:--", false), isNext = false)
