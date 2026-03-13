@@ -141,7 +141,8 @@ fun PrayerTimesScreen(
                                     val hour24 = parts[0].toInt()
                                     val min = parts[1]
                                     val hour12 = if (hour24 == 0) 12 else if (hour24 > 12) hour24 - 12 else hour24
-                                    displayTime = String.format("%02d:%s", hour12, min)
+                                    val amPm = if (hour24 >= 12) "PM" else "AM"
+                                    displayTime = String.format("%02d:%s %s", hour12, min, amPm)
                                 } catch (e: Exception) {}
                             }
 
