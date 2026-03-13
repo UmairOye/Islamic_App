@@ -4,6 +4,7 @@ import android.icu.util.IslamicCalendar
 
 data class CalendarDay(
     val dayOfMonth: Int,
+    val gregorianDay: Int? = null,
     val isCurrentMonth: Boolean,
     val isToday: Boolean
 )
@@ -12,7 +13,10 @@ data class MonthData(
     val monthName: String,
     val monthIndex: Int,
     val year: Int,
-    val days: List<CalendarDay>
+    val days: List<CalendarDay>,
+    val gregorianYear: Int? = null,
+    val gregorianMonthName: String? = null,
+    val gregorianDayOfMonth: Int? = null
 )
 
 object CalendarUtils {
@@ -20,8 +24,6 @@ object CalendarUtils {
     fun getGregorianMonthData(offsetMonths: Int): MonthData {
         val calendar = java.util.Calendar.getInstance()
         val today = calendar.get(java.util.Calendar.DAY_OF_MONTH)
-        val currentMonth = calendar.get(java.util.Calendar.MONTH)
-        val currentYear = calendar.get(java.util.Calendar.YEAR)
 
         calendar.add(java.util.Calendar.MONTH, offsetMonths)
 
@@ -32,25 +34,26 @@ object CalendarUtils {
 
         val daysInMonth = calendar.getActualMaximum(java.util.Calendar.DAY_OF_MONTH)
         calendar.set(java.util.Calendar.DAY_OF_MONTH, 1)
-        val firstDayOfWeek = calendar.get(java.util.Calendar.DAY_OF_WEEK) // 1 = Sunday, etc.
+
+        // Adjust so Monday is the first day of the week
+        // get(DAY_OF_WEEK) returns Sunday=1, Monday=2, ... Saturday=7
+        var firstDayOfWeek = calendar.get(java.util.Calendar.DAY_OF_WEEK) - 1 // Sunday=0, Monday=1, ... Saturday=6
+        if (firstDayOfWeek == 0) firstDayOfWeek = 7 // Sunday=7
+        val emptyPrefixCount = firstDayOfWeek - 1 // Monday=0 empty, Tuesday=1 empty... Sunday=6 empty
 
         val days = mutableListOf<CalendarDay>()
 
-        // Offset for empty cells before 1st day. (Assuming Monday is first day of UI row)
-        // If Sunday is first day, empty cells = firstDayOfWeek - 1. We will assume Sunday is first day.
-        val emptyPrefixCount = firstDayOfWeek - 1
         for (i in 0 until emptyPrefixCount) {
-            days.add(CalendarDay(0, false, false)) // Using 0 to represent empty
+            days.add(CalendarDay(0, null, false, false))
         }
 
         for (i in 1..daysInMonth) {
             val isToday = (offsetMonths == 0 && i == today)
-            days.add(CalendarDay(i, true, isToday))
+            days.add(CalendarDay(i, null, true, isToday))
         }
 
-        // Fill rest of the grid
         while (days.size % 7 != 0) {
-             days.add(CalendarDay(0, false, false))
+             days.add(CalendarDay(0, null, false, false))
         }
 
         return MonthData(
@@ -64,9 +67,8 @@ object CalendarUtils {
     fun getHijriMonthData(offsetMonths: Int): MonthData {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             val calendar = IslamicCalendar()
-            val today = calendar.get(IslamicCalendar.DAY_OF_MONTH)
-            val currentMonth = calendar.get(IslamicCalendar.MONTH)
-            val currentYear = calendar.get(IslamicCalendar.YEAR)
+
+            val todayHijri = calendar.get(IslamicCalendar.DAY_OF_MONTH)
 
             calendar.add(IslamicCalendar.MONTH, offsetMonths)
 
@@ -81,28 +83,45 @@ object CalendarUtils {
 
             val daysInMonth = calendar.getActualMaximum(IslamicCalendar.DAY_OF_MONTH)
             calendar.set(IslamicCalendar.DAY_OF_MONTH, 1)
-            val firstDayOfWeek = calendar.get(IslamicCalendar.DAY_OF_WEEK)
+
+            // Adjust so Monday is the first day of the week
+            var firstDayOfWeek = calendar.get(IslamicCalendar.DAY_OF_WEEK) - 1 // Sunday=0, Monday=1, ... Saturday=6
+            if (firstDayOfWeek == 0) firstDayOfWeek = 7 // Sunday=7
+            val emptyPrefixCount = firstDayOfWeek - 1 // Monday=0, Tuesday=1, ... Sunday=6
 
             val days = mutableListOf<CalendarDay>()
-            val emptyPrefixCount = firstDayOfWeek - 1
             for (i in 0 until emptyPrefixCount) {
-                days.add(CalendarDay(0, false, false))
+                days.add(CalendarDay(0, null, false, false))
             }
 
             for (i in 1..daysInMonth) {
-                val isToday = (offsetMonths == 0 && i == today)
-                days.add(CalendarDay(i, true, isToday))
+                calendar.set(IslamicCalendar.DAY_OF_MONTH, i)
+                val gregorianDate = java.util.Calendar.getInstance()
+                gregorianDate.timeInMillis = calendar.timeInMillis
+                val gregorianDay = gregorianDate.get(java.util.Calendar.DAY_OF_MONTH)
+
+                val isToday = (offsetMonths == 0 && i == todayHijri)
+                days.add(CalendarDay(i, gregorianDay, true, isToday))
             }
 
             while (days.size % 7 != 0) {
-                 days.add(CalendarDay(0, false, false))
+                 days.add(CalendarDay(0, null, false, false))
             }
+
+            // Get Gregorian details for the current displayed day (let's say the 1st of the Hijri month)
+            calendar.set(IslamicCalendar.DAY_OF_MONTH, 1)
+            val gregorianHeaderDate = java.util.Calendar.getInstance()
+            gregorianHeaderDate.timeInMillis = calendar.timeInMillis
+            val gregorianHeaderMonthNames = arrayOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 
             return MonthData(
                 monthName = monthNames[targetMonth],
                 monthIndex = targetMonth,
                 year = targetYear,
-                days = days
+                days = days,
+                gregorianYear = gregorianHeaderDate.get(java.util.Calendar.YEAR),
+                gregorianMonthName = gregorianHeaderMonthNames[gregorianHeaderDate.get(java.util.Calendar.MONTH)],
+                gregorianDayOfMonth = gregorianHeaderDate.get(java.util.Calendar.DAY_OF_MONTH)
             )
         } else {
             return MonthData("Unknown", 0, 1445, emptyList())
