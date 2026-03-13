@@ -11,12 +11,12 @@ import kotlin.math.*
  */
 object PrayerTimeCalculator {
 
-    // Calculation Method Parameters (Muslim World League)
+    // Calculation Method Parameters (University of Islamic Sciences, Karachi - Standard for Pakistan)
     private const val FAJR_ANGLE = 18.0
-    private const val ISHA_ANGLE = 17.0
+    private const val ISHA_ANGLE = 18.0
 
-    // Asr Juristic Method (Standard - Shafi'i, Maliki, Hanbali)
-    private const val ASR_FACTOR = 1.0 // Shadow ratio
+    // Asr Juristic Method (Hanafi - Standard for Pakistan)
+    private const val ASR_FACTOR = 2.0 // Shadow ratio
 
     private fun dsin(d: Double): Double = sin(Math.toRadians(d))
     private fun dcos(d: Double): Double = cos(Math.toRadians(d))
@@ -163,12 +163,9 @@ object PrayerTimeCalculator {
     private fun formatTime(time: Double): String {
         if (time.isNaN()) return "--:--"
         var t = fixHour(time + 0.5 / 60.0) // Add 0.5 minute to round up
-        val hours24 = floor(t).toInt()
-        val minutes = floor((t - hours24) * 60).toInt()
-
-        // Convert to 12-hour format without AM/PM text (as per user UI sample just showing "04:41")
-        // Wait, the user requested 12-hour format. Let's just output hh:mm
-        val hours12 = if (hours24 == 0) 12 else if (hours24 > 12) hours24 - 12 else hours24
-        return String.format("%02d:%02d", hours12, minutes)
+        val hours = floor(t).toInt()
+        val minutes = floor((t - hours) * 60).toInt()
+        // Return 24-hour format so domain logic can compare correctly
+        return String.format("%02d:%02d", hours, minutes)
     }
 }

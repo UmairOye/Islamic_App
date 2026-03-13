@@ -147,14 +147,26 @@ fun QiblaScreen(
         }
     }
 
+    // Maintain a continuous angle to prevent 360 to 0 snap spins
+    var continuousAzimuth by remember { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(azimuth) {
+        val diff = azimuth - (continuousAzimuth % 360)
+        continuousAzimuth += when {
+            diff > 180 -> diff - 360
+            diff < -180 -> diff + 360
+            else -> diff
+        }
+    }
+
     val animatedRotation by animateFloatAsState(
-        targetValue = -azimuth,
+        targetValue = -continuousAzimuth,
         animationSpec = tween(durationMillis = 300),
         label = "compass_rotation"
     )
 
     val animatedQiblaRotation by animateFloatAsState(
-        targetValue = uiState.qiblaDirection - azimuth,
+        targetValue = uiState.qiblaDirection - continuousAzimuth,
         animationSpec = tween(durationMillis = 300),
         label = "qibla_rotation"
     )
