@@ -21,9 +21,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.Canvas
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
@@ -31,6 +39,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.graphics.Paint
+import android.graphics.Typeface
+import kotlin.math.cos
+import kotlin.math.sin
 import com.ub.islamicapp.R
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -215,16 +227,19 @@ fun QiblaScreen(
                     textAlign = TextAlign.Center
                 )
             } else {
+                val displayAzimuth = (azimuth % 360).toInt()
                 Text(
-                    text = "Point your phone directly ahead",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.Gray,
+                    text = "$displayAzimuth Degree",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp
+                    ),
+                    color = Color.DarkGray,
                     textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(48.dp))
 
-                // Compass design using provided assets
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -232,79 +247,169 @@ fun QiblaScreen(
                         .background(Color.Transparent),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Outer static ring (Shadow/Background)
-                    Image(
-                        painter = painterResource(id = R.drawable.qibla_outer_ring_2),
-                        contentDescription = "Compass Background",
-                        modifier = Modifier.fillMaxSize(0.9f)
-                    )
-
-                    // Outer ticking ring (Rotating)
-                    Box(
+                    Canvas(
                         modifier = Modifier
-                            .fillMaxSize(0.85f)
-                            .rotate(animatedRotation),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.qibla_outer_ring_1),
-                            contentDescription = "Compass Outer Ring",
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
-                    // Qibla Dot Indicator on the track (Rotating relative to Qibla)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(0.85f)
-                            .rotate(animatedQiblaRotation),
-                        contentAlignment = Alignment.TopCenter
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.qibla_reading),
-                            contentDescription = "Qibla Indicator",
-                            modifier = Modifier
-                                .padding(top = 56.dp)
-                                .size(24.dp)
-                        )
-                    }
-
-                    // Inner elevated circle with readout
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(0.5f)
+                            .size(280.dp)
+                            .shadow(elevation = 4.dp, shape = CircleShape)
                             .clip(CircleShape)
                             .background(Color.White)
-                            .shadow(elevation = 16.dp, shape = CircleShape, spotColor = Color.LightGray.copy(alpha = 0.5f)),
+                    ) {
+                        // We will rotate the whole canvas to simulate the compass dial turning.
+                        // However, to keep the top text static relative to the dial, we rotate the drawing scope
+                        rotate(degrees = animatedRotation) {
+                            drawTicks()
+                            drawNumbers()
+                            drawDirections()
+                            // The needle points to the Qibla on the rotating dial
+                            rotate(degrees = uiState.qiblaDirection) {
+                                drawNeedle()
+                            }
+                        }
+                    }
+
+                    // Center Indicator
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(PrimaryGreen),
                         contentAlignment = Alignment.Center
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                            val displayAzimuth = (azimuth % 360).toInt()
-                            Text(
-                                text = "$displayAzimuth°",
-                                style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold, fontSize = 42.sp),
-                                color = Color(0xFF4A5568)
-                            )
-                            val cardinal = when (displayAzimuth) {
-                                in 338..359, in 0..22 -> "N"
-                                in 23..67 -> "NE"
-                                in 68..112 -> "E"
-                                in 113..157 -> "SE"
-                                in 158..202 -> "S"
-                                in 203..247 -> "SW"
-                                in 248..292 -> "W"
-                                in 293..337 -> "NW"
-                                else -> ""
-                            }
-                            Text(
-                                text = cardinal,
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = Color.Gray
-                            )
-                        }
+                        Text(
+                            text = "Kaaba",
+                            color = Color.White,
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
         }
     }
+}
+
+private fun DrawScope.drawTicks() {
+    val radius = size.minDimension / 2f
+    val center = Offset(size.width / 2f, size.height / 2f)
+
+    for (angle in 0 until 360 step 10) {
+        val isMajor = angle % 30 == 0
+        val lineLength = if (isMajor) 16.dp.toPx() else 8.dp.toPx()
+        val strokeWidth = if (isMajor) 2.dp.toPx() else 1.dp.toPx()
+        val color = if (isMajor) PrimaryGreen else Color.LightGray
+
+        rotate(degrees = angle.toFloat(), pivot = center) {
+            drawLine(
+                color = color,
+                start = Offset(center.x, center.y - radius + 16.dp.toPx()),
+                end = Offset(center.x, center.y - radius + 16.dp.toPx() + lineLength),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+        }
+    }
+}
+
+private fun DrawScope.drawNumbers() {
+    val radius = size.minDimension / 2f
+    val center = Offset(size.width / 2f, size.height / 2f)
+
+    val paint = Paint().apply {
+        color = android.graphics.Color.parseColor("#1B5E20") // Primary Green approx
+        textSize = 12.sp.toPx()
+        textAlign = Paint.Align.CENTER
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        isAntiAlias = true
+    }
+
+    for (angle in 0 until 360 step 30) {
+        // We want the text to be readable (not upside down if possible, but rotating the canvas handles the whole dial)
+        // Draw at the top, and rotate the canvas
+        rotate(degrees = angle.toFloat(), pivot = center) {
+            drawContext.canvas.nativeCanvas.drawText(
+                angle.toString(),
+                center.x,
+                center.y - radius + 12.dp.toPx(),
+                paint
+            )
+        }
+    }
+}
+
+private fun DrawScope.drawDirections() {
+    val radius = size.minDimension / 2f
+    val center = Offset(size.width / 2f, size.height / 2f)
+
+    val basePaint = Paint().apply {
+        textSize = 16.sp.toPx()
+        textAlign = Paint.Align.CENTER
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        isAntiAlias = true
+    }
+
+    val directions = listOf(
+        Pair("N", android.graphics.Color.RED),
+        Pair("E", android.graphics.Color.DKGRAY),
+        Pair("S", android.graphics.Color.DKGRAY),
+        Pair("W", android.graphics.Color.DKGRAY)
+    )
+
+    for ((i, dir) in directions.withIndex()) {
+        val angle = i * 90f
+        val paint = Paint(basePaint).apply { color = dir.second }
+        rotate(degrees = angle, pivot = center) {
+            drawContext.canvas.nativeCanvas.drawText(
+                dir.first,
+                center.x,
+                center.y - radius + 48.dp.toPx(), // Further inside
+                paint
+            )
+        }
+    }
+}
+
+private fun DrawScope.drawNeedle() {
+    val center = Offset(size.width / 2f, size.height / 2f)
+    val needleLength = 60.dp.toPx()
+    val needleWidth = 24.dp.toPx()
+
+    // Top Triangle (Yellow)
+    val topPath = Path().apply {
+        moveTo(center.x, center.y - needleLength)
+        lineTo(center.x + needleWidth / 2f, center.y - needleLength / 2f)
+        lineTo(center.x - needleWidth / 2f, center.y - needleLength / 2f)
+        close()
+    }
+
+    // Bottom Triangle (Blue/Grey)
+    val bottomPath = Path().apply {
+        moveTo(center.x - needleWidth / 2f, center.y - needleLength / 2f)
+        lineTo(center.x + needleWidth / 2f, center.y - needleLength / 2f)
+        lineTo(center.x, center.y - 10.dp.toPx())
+        close()
+    }
+
+    // Light green/teal faint background shadow or wide pointer behind it
+    val shadowPath = Path().apply {
+        moveTo(center.x, center.y - needleLength - 8.dp.toPx())
+        lineTo(center.x + needleWidth, center.y - needleLength / 2f)
+        lineTo(center.x, center.y)
+        lineTo(center.x - needleWidth, center.y - needleLength / 2f)
+        close()
+    }
+
+    drawPath(
+        path = shadowPath,
+        color = PrimaryGreen.copy(alpha = 0.2f)
+    )
+
+    drawPath(
+        path = topPath,
+        color = Color(0xFFFFC107) // Yellow
+    )
+
+    drawPath(
+        path = bottomPath,
+        color = Color(0xFF607D8B) // Blue-Grey
+    )
 }

@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.*
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -105,9 +104,7 @@ fun PrayerTimesScreen(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-                HorizontalDivider(
-                    color = Color.LightGray.copy(alpha = 0.3f)
-                )
+                Divider(color = Color.LightGray.copy(alpha = 0.3f))
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
