@@ -254,31 +254,32 @@ fun QiblaScreen(
                             .clip(CircleShape)
                             .background(Color.White)
                     ) {
-                        // We will rotate the whole canvas to simulate the compass dial turning.
-                        // However, to keep the top text static relative to the dial, we rotate the drawing scope
-                        rotate(degrees = animatedRotation) {
-                            drawTicks()
-                            drawNumbers()
-                            drawDirections()
-                            // The needle points to the Qibla on the rotating dial
-                            rotate(degrees = uiState.qiblaDirection) {
-                                drawNeedle()
-                            }
+                        // Static Dial Background
+                        drawTicks()
+                        drawNumbers()
+                        drawDirections()
+
+                        // The needle rotates to point to the Qibla relative to the current device orientation
+                        // Note: If the device is pointing N (azimuth 0), and Qibla is 90, needle points right.
+                        // If device turns right 90 deg (azimuth 90), needle should point top (0).
+                        // So needle rotation is QiblaDirection - CurrentAzimuth
+                        rotate(degrees = animatedQiblaRotation) {
+                            drawNeedle()
                         }
                     }
 
                     // Center Indicator
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(48.dp)
                             .clip(CircleShape)
                             .background(PrimaryGreen),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Kaaba",
+                            text = "${uiState.qiblaDirection.toInt()}°",
                             color = Color.White,
-                            fontSize = 8.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
