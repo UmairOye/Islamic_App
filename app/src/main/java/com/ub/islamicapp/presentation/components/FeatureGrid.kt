@@ -1,10 +1,6 @@
 package com.ub.islamicapp.presentation.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.DateRange
-import androidx.compose.material.icons.rounded.Explore
-import androidx.compose.material.icons.rounded.FiberManualRecord
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -49,14 +45,5 @@ fun FeatureGrid(
 
         }
 
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.spacedBy(16.dp)
-//        ) {
-//            FeatureItem(label = "Calendar", icon = Icons.Rounded.CalendarMonth, onClick = onNavigateToCalendar, modifier = Modifier.weight(1f))
-//            FeatureItem(label = "Dua", icon = Icons.Rounded.WavingHand, onClick = { }, modifier = Modifier.weight(1f))
-//            FeatureItem(label = "Hadith", icon = Icons.AutoMirrored.Rounded.MenuBook, onClick = { }, modifier = Modifier.weight(1f))
-//            FeatureItem(label = "Salah", icon = Icons.Rounded.AccessTime, onClick = onNavigateToSalah, modifier = Modifier.weight(1f))
-//        }
     }
 }
