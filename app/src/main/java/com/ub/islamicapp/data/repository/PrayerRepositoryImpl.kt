@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.flow
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
-import kotlin.math.abs
 
 class PrayerRepositoryImpl @Inject constructor(
     private val context: Application
@@ -38,8 +37,8 @@ class PrayerRepositoryImpl @Inject constructor(
         val distThreshold = 0.001 // roughly 100 meters
 
         if (cachedLat != null && cachedLng != null &&
-            abs(cachedLat!! - latitude) < distThreshold &&
-            abs(cachedLng!! - longitude) < distThreshold &&
+            Math.abs(cachedLat!! - latitude) < distThreshold &&
+            Math.abs(cachedLng!! - longitude) < distThreshold &&
             cachedLocationName != null) {
             locName = cachedLocationName!!
         } else {
@@ -135,17 +134,21 @@ class PrayerRepositoryImpl @Inject constructor(
 
         // Hijri Date Formatting
         val hijriDateStr = try {
-            val islamicCalendar = android.icu.util.IslamicCalendar()
-            val hDay = islamicCalendar.get(android.icu.util.IslamicCalendar.DAY_OF_MONTH)
-            val hMonth = islamicCalendar.get(android.icu.util.IslamicCalendar.MONTH)
-            val hYear = islamicCalendar.get(android.icu.util.IslamicCalendar.YEAR)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                val islamicCalendar = android.icu.util.IslamicCalendar()
+                val hDay = islamicCalendar.get(android.icu.util.IslamicCalendar.DAY_OF_MONTH)
+                val hMonth = islamicCalendar.get(android.icu.util.IslamicCalendar.MONTH)
+                val hYear = islamicCalendar.get(android.icu.util.IslamicCalendar.YEAR)
 
-            val monthNames = arrayOf(
-                "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
-                "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
-                "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
-            )
-            "$hDay ${monthNames[hMonth]} $hYear H"
+                val monthNames = arrayOf(
+                    "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+                    "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
+                    "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
+                )
+                "$hDay ${monthNames[hMonth]} $hYear H"
+            } else {
+                "Unknown Hijri Date"
+            }
         } catch (e: Exception) {
             "Unknown Hijri Date"
         }

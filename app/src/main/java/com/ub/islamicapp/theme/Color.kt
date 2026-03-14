@@ -2,8 +2,8 @@ package com.ub.islamicapp.theme
 
 import androidx.compose.ui.graphics.Color
 
-val PrimaryGreen = Color(0xFF12A792)
-val EmeraldGreen = Color(0xFF12A792)
+val PrimaryGreen = Color(0xFF1F8A70)
+val EmeraldGreen = Color(0xFF2ECC71)
 val AccentGold = Color(0xFFE8B923)
 
 val LightBackground = Color(0xFFF6F8F7)
