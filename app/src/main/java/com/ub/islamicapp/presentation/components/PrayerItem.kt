@@ -12,9 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ub.islamicapp.R
 import com.ub.islamicapp.presentation.state.PrayerTime
 import com.ub.islamicapp.theme.InterFontFamily
 import java.util.Locale
@@ -26,11 +28,11 @@ fun PrayerItem(
     modifier: Modifier = Modifier
 ) {
     val icon = when (prayer.name.lowercase()) {
-        "fajr" -> Icons.Rounded.WbCloudy
-        "dzuhr", "dhuhr" -> Icons.Rounded.WbSunny
-        "asr" -> Icons.Rounded.WbSunny
-        "maghrib" -> Icons.Rounded.WbSunny
-        else -> Icons.Rounded.ModeNight
+        "fajr" -> R.drawable.maghrib
+        "dzuhr", "dhuhr" -> R.drawable.dhuhr
+        "asr" -> R.drawable.asar
+        "maghrib" -> R.drawable.maghrib
+        else -> R.drawable.isha
     }
 
     Column(
@@ -49,7 +51,7 @@ fun PrayerItem(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Icon(
-            imageVector = icon,
+            painter = painterResource(icon),
             contentDescription = prayer.name,
             tint = Color.White,
             modifier = Modifier.size(24.dp)
