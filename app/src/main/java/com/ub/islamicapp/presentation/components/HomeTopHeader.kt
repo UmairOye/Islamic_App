@@ -21,6 +21,7 @@ import androidx.compose.material.icons.rounded.LocationOff
 import androidx.compose.ui.draw.alpha
 import com.ub.islamicapp.R
 import com.ub.islamicapp.presentation.state.PrayerTime
+import com.ub.islamicapp.theme.InterFontFamily
 
 @Composable
 fun HomeTopHeader(
@@ -60,10 +61,10 @@ fun HomeTopHeader(
                 Column {
                     Text(
                         text = hijriDate,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        fontFamily = InterFontFamily,
+                        fontWeight = FontWeight.Medium,
                         color = Color.White
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
                     if (isLocationError) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -82,7 +83,9 @@ fun HomeTopHeader(
                     } else {
                         Text(
                             text = location,
-                            style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = InterFontFamily,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal,
                             color = Color.White.copy(alpha = 0.8f)
                         )
                     }
@@ -93,13 +96,11 @@ fun HomeTopHeader(
 
             Text(
                 text = currentTime,
-                style = MaterialTheme.typography.displayLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 64.sp
-                ),
+                fontFamily = InterFontFamily,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 64.sp,
                 color = Color.White
             )
-            Spacer(modifier = Modifier.height(8.dp))
 
             if (isLocationError) {
                 Text(
@@ -110,7 +111,9 @@ fun HomeTopHeader(
             } else {
                 Text(
                     text = timeRemaining,
-                    style = MaterialTheme.typography.bodyLarge,
+                    fontFamily = InterFontFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.9f)
                 )
             }
