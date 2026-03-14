@@ -9,18 +9,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -41,8 +33,6 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
-    var headerHeightPx by remember { mutableIntStateOf(0) }
-    val density = LocalDensity.current
     val context = LocalContext.current
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -77,56 +67,36 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            HomeTopHeader(
-                hijriDate = uiState.hijriDate,
-                location = uiState.location,
-                currentTime = uiState.currentTime,
-                timeRemaining = uiState.timeRemaining,
-                prayers = uiState.prayerTimes,
-                nextPrayer = uiState.nextPrayer,
-                isLocationError = uiState.error == "NO_LOCATION" || uiState.error != null,
-                modifier = Modifier
-                    .onSizeChanged { headerHeightPx = it.height }
-                    .graphicsLayer {
-                        translationY = -scrollState.value * 0.2f
-                        alpha = 1f - (scrollState.value.toFloat() / (headerHeightPx * 1.5f)).coerceIn(0f, 1f)
-                        val scale = 1f - (scrollState.value.toFloat() / 3000f).coerceIn(0f, 0.05f)
-                        scaleX = scale
-                        scaleY = scale
-                    }
-            )
-            
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
             ) {
-                val headerHeightDp = with(density) { headerHeightPx.toDp() }
-                Spacer(modifier = Modifier.height(headerHeightDp))
-                
+//                val headerHeightDp = with(density) { headerHeightPx.toDp() }
+//                Spacer(modifier = Modifier.height(headerHeightDp))
+
+
+                HomeTopHeader(
+                    hijriDate = uiState.hijriDate,
+                    location = uiState.location,
+                    currentTime = uiState.currentTime,
+                    timeRemaining = uiState.timeRemaining,
+                    prayers = uiState.prayerTimes,
+                    nextPrayer = uiState.nextPrayer,
+                    isLocationError = uiState.error == "NO_LOCATION" || uiState.error != null
+                )
+
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .shadow(
-                            elevation = 24.dp, 
-                            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                            spotColor = androidx.compose.ui.graphics.Color.Black,
-                            ambientColor = androidx.compose.ui.graphics.Color.Black
-                        )
-                        .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                         .background(LightBackground)
                         .padding(bottom = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(32.dp),
                     horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
                 ) {
-                    // Docker Handle / Notch
-                    Box(
-                        modifier = Modifier
-                            .padding(top = 12.dp, bottom = 8.dp)
-                            .size(width = 48.dp, height = 6.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(PrimaryGreen.copy(alpha = 0.3f))
-                    )
 
                     FeatureGrid(
                         onNavigateToHijri = { navController.navigate("hijri_calendar") },
@@ -136,9 +106,9 @@ fun HomeScreen(
                     )
                     
                     LastReadCard(
-                        surah = uiState.lastReadSurah,
-                        verse = uiState.lastReadVerse,
-                        onContinueClick = { /* Handle click */ }
+//                        surah = uiState.lastReadSurah,
+//                        verse = uiState.lastReadVerse,
+//                        onContinueClick = {  }
                     )
                     
                     if (uiState.error != "NO_LOCATION" && uiState.prayerTimes.isNotEmpty()) {
