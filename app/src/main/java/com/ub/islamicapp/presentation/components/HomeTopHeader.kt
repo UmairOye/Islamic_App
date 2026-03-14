@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.rounded.LocationOff
 import com.ub.islamicapp.R
 import com.ub.islamicapp.presentation.state.PrayerTime
+import com.ub.islamicapp.theme.InterFontFamily
 
 @Composable
 fun HomeTopHeader(
@@ -52,31 +53,40 @@ fun HomeTopHeader(
         ) {
             // Top Row (Date, Location, Bell)
             Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
-        ) {
-            Column {
-                Text(
-                    text = hijriDate,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                if (isLocationError) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Rounded.LocationOff,
-                            contentDescription = "Location Off",
-                            tint = Color.White.copy(alpha = 0.8f),
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column {
+                    Text(
+                        text = hijriDate,
+                        fontFamily = InterFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
+                    )
+                    if (isLocationError) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Rounded.LocationOff,
+                                contentDescription = "Location Off",
+                                tint = Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Turn on GPS to fetch prayer times",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.8f)
+                            )
+                        }
+                    } else {
                         Text(
-                            text = "Turn on GPS to fetch prayer times",
-                            style = MaterialTheme.typography.bodyMedium,
+                            text = location,
+                            fontFamily = InterFontFamily,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal,
                             color = Color.White.copy(alpha = 0.8f)
                         )
                     }
@@ -99,30 +109,29 @@ fun HomeTopHeader(
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        // Large Clock
-        Text(
-            text = currentTime,
-            style = MaterialTheme.typography.displayLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 64.sp
-            ),
-            color = Color.White
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = currentTime,
+                fontFamily = InterFontFamily,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 64.sp,
+                color = Color.White
+            )
 
-        if (isLocationError) {
-             Text(
-                text = "GPS required for times",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White.copy(alpha = 0.9f)
-            )
-        } else {
-             Text(
-                text = timeRemaining,
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White.copy(alpha = 0.9f)
-            )
-        }
+            if (isLocationError) {
+                Text(
+                    text = "GPS required for times",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White.copy(alpha = 0.9f)
+                )
+            } else {
+                Text(
+                    text = timeRemaining,
+                    fontFamily = InterFontFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    color = Color.White.copy(alpha = 0.9f)
+                )
+            }
 
         Spacer(modifier = Modifier.height(56.dp))
 
