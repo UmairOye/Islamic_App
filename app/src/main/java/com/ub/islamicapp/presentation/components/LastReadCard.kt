@@ -3,13 +3,6 @@ package com.ub.islamicapp.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material.icons.automirrored.rounded.MenuBook
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,10 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ub.islamicapp.R
 import com.ub.islamicapp.theme.EmeraldGreen
 import com.ub.islamicapp.theme.PrimaryGreen
 
@@ -39,11 +35,10 @@ fun LastReadCard(
 
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp)
+            .fillMaxWidth().padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(gradientBrush)
-            .padding(24.dp)
+            .padding(12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -52,12 +47,35 @@ fun LastReadCard(
         ) {
 
 
-            Text(
-                text = "Ayat of the Moment",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
+            Column {
+
+
+                Text(
+                    text = "Ayat of the Moment",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+
+
+                Text(
+                    text = "Surah-Al-Baqarah [3-4]",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White
+                )
+
+
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "وَ الَّذِیْنَ یُؤْمِنُوْنَ بِمَاۤ اُنْزِلَ اِلَیْكَ وَ مَاۤ اُنْزِلَ مِنْ قَبْلِكَۚ-وَ بِالْاٰخِرَةِ هُمْ یُوْقِنُوْنَﭤ ",
+                    fontSize = 26.sp,
+                    fontFamily = FontFamily(Font(R.font.noorehuda, FontWeight.Bold)),
+                    color = Color.White
+                )
+            }
+
 //            Column {
 //                Text(
 //                    text = "Last Read",
