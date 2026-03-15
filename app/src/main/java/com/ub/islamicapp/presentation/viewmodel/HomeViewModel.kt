@@ -33,6 +33,12 @@ class HomeViewModel @Inject constructor(
 
     fun updateLocationAndPrayers() {
         viewModelScope.launch {
+            // Only fetch if we haven't successfully fetched today, or if we want to ensure it's loaded.
+            // Since this app targets caching, we should check if prayers are already loaded
+            if (_uiState.value.prayerTimes.isNotEmpty() && _uiState.value.prayerTimes.first().time != "--:--") {
+                return@launch
+            }
+
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             
             val location = locationTracker.getCurrentLocation()
