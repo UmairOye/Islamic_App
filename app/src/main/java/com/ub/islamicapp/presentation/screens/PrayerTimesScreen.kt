@@ -22,12 +22,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.ub.islamicapp.R
 import com.ub.islamicapp.presentation.viewmodel.HomeViewModel
 import com.ub.islamicapp.theme.LightBackground
 import com.ub.islamicapp.theme.PrimaryGreen
@@ -41,6 +43,10 @@ fun PrayerTimesScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.updateLocationAndPrayers()
+    }
 
     Column(
         modifier = Modifier
@@ -187,18 +193,19 @@ fun HeroSection(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        PrimaryGreen,
-                        Color(0xFF155D4B) // Darker green shade
-                    )
-                )
-            )
-            .padding(24.dp)
     ) {
+        androidx.compose.foundation.Image(
+            painter = painterResource(id = R.drawable.salah_top_header_bg),
+            contentDescription = null,
+            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+            modifier = Modifier.matchParentSize()
+        )
+
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Black.copy(alpha = 0.2f)) // Subtle darkening for readability over image
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // "UP NEXT" Pill
