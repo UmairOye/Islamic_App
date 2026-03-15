@@ -18,9 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.rounded.LocationOff
+import androidx.compose.ui.draw.alpha
 import com.ub.islamicapp.R
 import com.ub.islamicapp.presentation.state.PrayerTime
-import com.ub.islamicapp.theme.InterFontFamily
 
 @Composable
 fun HomeTopHeader(
@@ -34,15 +34,14 @@ fun HomeTopHeader(
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
-        // Mosque Background
         Image(
-            painter = painterResource(id = R.drawable.ic_mosque_silhouette),
+            painter = painterResource(id = R.drawable.pngwing),
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp)
+                .alpha(0.1f)
         )
 
         Column(
@@ -51,7 +50,6 @@ fun HomeTopHeader(
                 .padding(top = 16.dp, bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Top Row (Date, Location, Bell)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -62,10 +60,10 @@ fun HomeTopHeader(
                 Column {
                     Text(
                         text = hijriDate,
-                        fontFamily = InterFontFamily,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = Color.White
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     if (isLocationError) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -84,38 +82,24 @@ fun HomeTopHeader(
                     } else {
                         Text(
                             text = location,
-                            fontFamily = InterFontFamily,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Normal,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = Color.White.copy(alpha = 0.8f)
                         )
                     }
-                } else {
-                    Text(
-                        text = location,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
                 }
             }
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    imageVector = Icons.Rounded.Notifications,
-                    contentDescription = "Notifications",
-                    tint = Color.White
-                )
-            }
-        }
 
-        Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
             Text(
                 text = currentTime,
-                fontFamily = InterFontFamily,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 64.sp,
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 64.sp
+                ),
                 color = Color.White
             )
+            Spacer(modifier = Modifier.height(8.dp))
 
             if (isLocationError) {
                 Text(
@@ -126,30 +110,28 @@ fun HomeTopHeader(
             } else {
                 Text(
                     text = timeRemaining,
-                    fontFamily = InterFontFamily,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = Color.White.copy(alpha = 0.9f)
                 )
             }
 
-        Spacer(modifier = Modifier.height(56.dp))
+            Spacer(modifier = Modifier.height(56.dp))
 
-        // Prayer Times Row
-        if (isLocationError || prayers.isEmpty()) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Shimmer / Placeholder style for prayer items
-                val placeholderNames = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
-                placeholderNames.forEach { name ->
-                    PrayerItem(prayer = PrayerTime(name, "--:--", false), isNext = false)
+            if (isLocationError || prayers.isEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    val placeholderNames = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+                    placeholderNames.forEach { name ->
+                        PrayerItem(prayer = PrayerTime(name, "--:--", false), isNext = false)
+                    }
                 }
+            } else {
+                PrayerTimesRow(prayers = prayers, nextPrayer = nextPrayer)
             }
-        } else {
-            PrayerTimesRow(prayers = prayers, nextPrayer = nextPrayer)
         }
-    }
     }
 }
