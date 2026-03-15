@@ -1,5 +1,7 @@
 package com.ub.islamicapp.presentation.screens
 
+import android.R.attr.shadowColor
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,15 +13,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
+import androidx.compose.material3.FloatingActionButtonDefaults.elevation
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.res.painterResource
@@ -31,6 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ub.islamicapp.R
 import com.ub.islamicapp.presentation.viewmodel.HomeViewModel
+import com.ub.islamicapp.theme.InterFontFamily
 import com.ub.islamicapp.theme.LightBackground
 import com.ub.islamicapp.theme.PrimaryGreen
 import java.text.SimpleDateFormat
@@ -52,13 +64,14 @@ fun PrayerTimesScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(LightBackground)
-            .padding(horizontal = 16.dp)
+            .statusBarsPadding().navigationBarsPadding()
+//            .padding(horizontal = 16.dp)
     ) {
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
+                .padding(bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -79,7 +92,8 @@ fun PrayerTimesScreen(
                 )
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(end = 16.dp)) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
@@ -118,7 +132,7 @@ fun PrayerTimesScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
+                .padding(horizontal = 24.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -142,7 +156,7 @@ fun PrayerTimesScreen(
 
         // Prayer List
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
@@ -178,7 +192,7 @@ fun HeroSection(
             val min = parts[1]
             val hour12 = if (hour24 == 0) 12 else if (hour24 > 12) hour24 - 12 else hour24
             nextPrayerAmPm = if (hour24 >= 12) "PM" else "AM"
-            nextPrayerTimeStr = String.format("%02d:%s", hour12, min)
+            nextPrayerTimeStr = String.format(Locale.US,"%02d:%s", hour12, min)
         } catch (e: Exception) {}
     }
 
@@ -189,20 +203,20 @@ fun HeroSection(
 
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth().padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(24.dp))
+
     ) {
-        androidx.compose.foundation.Image(
+        Image(
             painter = painterResource(id = R.drawable.salah_top_header_bg),
             contentDescription = null,
-            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+            contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize()
         )
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.Black.copy(alpha = 0.2f)) // Subtle darkening for readability over image
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -215,11 +229,10 @@ fun HeroSection(
             ) {
                 Text(
                     text = "UP NEXT",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 1.5.sp,
-                        color = Color.White
-                    )
+                    fontSize = 12.sp,
+                    fontFamily = InterFontFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
                 )
             }
 
@@ -227,10 +240,14 @@ fun HeroSection(
 
             Text(
                 text = if (nextPrayer == "--") "Loading" else nextPrayer,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Light,
-                    color = Color.White
-                )
+//                style = MaterialTheme.typography.headlineMedium.copy(
+//                    fontWeight = FontWeight.Light,
+//                    color = Color.White
+//                )
+
+                fontSize = 30.sp,
+                fontFamily = InterFontFamily,
+                fontWeight = FontWeight.Light
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -238,20 +255,19 @@ fun HeroSection(
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = if (nextPrayerTimeStr.isEmpty()) "--:--" else nextPrayerTimeStr,
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 64.sp,
-                        letterSpacing = (-2).sp,
-                        color = Color.White
-                    )
+                    fontSize = 60.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = InterFontFamily,
+                    color = Color.White,
+                    letterSpacing = (-2).sp
                 )
                 if (nextPrayerAmPm.isNotEmpty()) {
                     Text(
                         text = nextPrayerAmPm,
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Normal,
-                            color = Color.White
-                        ),
+                        fontSize = 24.sp,
+                        fontFamily = InterFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        color = Color.White,
                         modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
                     )
                 }
@@ -280,17 +296,17 @@ fun HeroSection(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = timeRemaining,
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = FontWeight.Medium,
-                            color = Color.White
-                        )
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        fontFamily = InterFontFamily,
+                        color = Color.White
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Divider(color = Color.White.copy(alpha = 0.1f))
+            HorizontalDivider( color = Color.White.copy(alpha = 0.1f))
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -411,20 +427,20 @@ fun PrayerTimeItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-//                Box(
-//                    modifier = Modifier
-//                        .size(40.dp)
-//                        .clip(RoundedCornerShape(12.dp))
-//                        .background(iconBoxColor.copy(alpha = contentAlpha)),
-//                    contentAlignment = Alignment.Center
-//                ) {
-                    Icon(
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if(isNext) PrimaryGreen else PrimaryGreen.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
                         painter = painterResource(icon),
                         contentDescription = null,
-                        tint = iconColor.copy(alpha = contentAlpha),
-                        modifier = Modifier.size(40.dp)
+                        colorFilter = ColorFilter.tint(color = if(isNext) Color.White else PrimaryGreen ),
+                        modifier = Modifier.size(18.dp)
                     )
-//                }
+                }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
