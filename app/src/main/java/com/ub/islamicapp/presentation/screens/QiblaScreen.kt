@@ -1,55 +1,44 @@
 package com.ub.islamicapp.presentation.screens
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.Canvas
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.Image
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.sp
-import android.graphics.Paint
-import android.graphics.Typeface
-import kotlin.math.cos
-import kotlin.math.sin
 import com.ub.islamicapp.R
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ub.islamicapp.presentation.viewmodel.QiblaViewModel
-import com.ub.islamicapp.theme.LightBackground
 import com.ub.islamicapp.theme.PrimaryGreen
+import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,113 +46,93 @@ fun QiblaScreen(
     navController: NavController,
     viewModel: QiblaViewModel = hiltViewModel()
 ) {
+
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
     var azimuth by remember { mutableFloatStateOf(0f) }
 
-    val sensorManager = remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
-    val accelerometer = remember { sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) }
-    val magnetometer = remember { sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) }
-
-    LaunchedEffect(Unit) {
-        viewModel.onSensorsAvailable(accelerometer != null && magnetometer != null)
+    val sensorManager = remember {
+        context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val granted = permissions.values.all { it }
-        viewModel.onPermissionsResult(granted)
+    val accelerometer = remember {
+        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     }
 
-    LaunchedEffect(Unit) {
-        val permissions = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        )
-        val allGranted = permissions.all {
-            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-        }
-        viewModel.onPermissionsResult(allGranted)
-        if (!allGranted) {
-            permissionLauncher.launch(permissions)
-        }
+    val magnetometer = remember {
+        sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
     }
 
-    // Sensor listener
-    DisposableEffect(uiState.hasSensors) {
-        val sensorEventListener = object : SensorEventListener {
-            var lastAccelerometer = FloatArray(3)
-            var lastMagnetometer = FloatArray(3)
-            var lastAccelerometerSet = false
-            var lastMagnetometerSet = false
+    var continuousAzimuth by remember { mutableFloatStateOf(0f) }
 
-            // Low-pass filter constant (0.0 - 1.0)
-            // Smaller value = smoother but slower to update
-            val alpha = 0.05f
+    DisposableEffect(Unit) {
 
-            private fun lowPassFilter(input: FloatArray, output: FloatArray?): FloatArray {
-                if (output == null) return input
-                for (i in input.indices) {
-                    output[i] = output[i] + alpha * (input[i] - output[i])
-                }
-                return output
-            }
+        val sensorListener = object : SensorEventListener {
+
+            var gravity = FloatArray(3)
+            var geomagnetic = FloatArray(3)
 
             override fun onSensorChanged(event: SensorEvent) {
-                if (event.sensor === accelerometer) {
-                    lastAccelerometer = lowPassFilter(event.values.clone(), lastAccelerometer)
-                    lastAccelerometerSet = true
-                } else if (event.sensor === magnetometer) {
-                    lastMagnetometer = lowPassFilter(event.values.clone(), lastMagnetometer)
-                    lastMagnetometerSet = true
+
+                when (event.sensor.type) {
+
+                    Sensor.TYPE_ACCELEROMETER ->
+                        gravity = event.values.clone()
+
+                    Sensor.TYPE_MAGNETIC_FIELD ->
+                        geomagnetic = event.values.clone()
                 }
 
-                if (lastAccelerometerSet && lastMagnetometerSet) {
-                    val r = FloatArray(9)
-                    if (SensorManager.getRotationMatrix(r, null, lastAccelerometer, lastMagnetometer)) {
-                        val orientation = FloatArray(3)
-                        SensorManager.getOrientation(r, orientation)
-                        val azimuthInRadians = orientation[0]
-                        var azimuthInDegrees = (Math.toDegrees(azimuthInRadians.toDouble()) + 360).toFloat() % 360
+                val R = FloatArray(9)
+                val I = FloatArray(9)
 
-                        // Additional smoothing specifically for the final degree output to avoid jitter
-                        // Using a simple threshold check (if change is very small, ignore it)
-                        if (Math.abs(azimuth - azimuthInDegrees) > 1.0f && Math.abs(azimuth - azimuthInDegrees) < 359.0f) {
-                            // Circular smoothing for the final angle
-                            val diff = azimuthInDegrees - azimuth
-                            if (diff > 180) azimuthInDegrees -= 360
-                            else if (diff < -180) azimuthInDegrees += 360
+                val success = SensorManager.getRotationMatrix(
+                    R,
+                    I,
+                    gravity,
+                    geomagnetic
+                )
 
-                            azimuth = (azimuth + 0.1f * (azimuthInDegrees - azimuth))
-                            if (azimuth < 0) azimuth += 360f
-                            if (azimuth >= 360f) azimuth -= 360f
-                        }
-                    }
+                if (success) {
+
+                    val orientation = FloatArray(3)
+
+                    SensorManager.getOrientation(R, orientation)
+
+                    val azimuthRadians = orientation[0]
+
+                    val azimuthDegrees =
+                        (Math.toDegrees(azimuthRadians.toDouble()) + 360).toFloat() % 360
+
+                    azimuth = azimuthDegrees
                 }
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
 
-        if (uiState.hasSensors) {
-            sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_UI)
-            sensorManager.registerListener(sensorEventListener, magnetometer, SensorManager.SENSOR_DELAY_UI)
-        }
+        sensorManager.registerListener(
+            sensorListener,
+            accelerometer,
+            SensorManager.SENSOR_DELAY_UI
+        )
+
+        sensorManager.registerListener(
+            sensorListener,
+            magnetometer,
+            SensorManager.SENSOR_DELAY_UI
+        )
 
         onDispose {
-            if (uiState.hasSensors) {
-                sensorManager.unregisterListener(sensorEventListener)
-            }
+            sensorManager.unregisterListener(sensorListener)
         }
     }
 
-    // Maintain a continuous angle to prevent 360 to 0 snap spins
-    var continuousAzimuth by remember { mutableFloatStateOf(0f) }
-
     LaunchedEffect(azimuth) {
+
         val diff = azimuth - (continuousAzimuth % 360)
+
         continuousAzimuth += when {
             diff > 180 -> diff - 360
             diff < -180 -> diff + 360
@@ -173,244 +142,180 @@ fun QiblaScreen(
 
     val animatedRotation by animateFloatAsState(
         targetValue = -continuousAzimuth,
-        animationSpec = tween(durationMillis = 300),
+        animationSpec = tween(300),
         label = "compass_rotation"
     )
 
     val animatedQiblaRotation by animateFloatAsState(
         targetValue = uiState.qiblaDirection - continuousAzimuth,
-        animationSpec = tween(durationMillis = 300),
+        animationSpec = tween(300),
         label = "qibla_rotation"
     )
+
+    val direction = remember(uiState.qiblaDirection) {
+        when (uiState.qiblaDirection) {
+            in 0f..22f, in 338f..360f -> "N"
+            in 23f..67f -> "NE"
+            in 68f..112f -> "E"
+            in 113f..157f -> "SE"
+            in 158f..202f -> "S"
+            in 203f..247f -> "SW"
+            in 248f..292f -> "W"
+            else -> "NW"
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Qibla Direction") },
+                title = { Text("Qibla") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = LightBackground)
-            )
-        },
-        containerColor = LightBackground
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            if (!uiState.hasSensors) {
-                Text(
-                    text = "Your device doesn't support compass sensors required for Qibla direction.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center
-                )
-            } else if (!uiState.hasLocationPermission) {
-                 Text(
-                    text = "Location permission is required to calculate accurate Qibla direction.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center
-                )
-            } else if (uiState.isLoadingLocation) {
-                 CircularProgressIndicator(color = PrimaryGreen)
-                 Spacer(modifier = Modifier.height(16.dp))
-                 Text(
-                    text = "Calculating Qibla direction...",
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center
-                )
-            } else {
-                val displayAzimuth = (azimuth % 360).toInt()
-                Text(
-                    text = "$displayAzimuth Degree",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp
-                    ),
-                    color = Color.DarkGray,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .background(Color.Transparent),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Canvas(
-                        modifier = Modifier
-                            .size(280.dp)
-                            .shadow(elevation = 4.dp, shape = CircleShape)
-                            .clip(CircleShape)
-                            .background(Color.White)
+                    IconButton(
+                        onClick = { navController.popBackStack() }
                     ) {
-                        // Static Dial Background
-                        drawTicks()
-                        drawNumbers()
-                        drawDirections()
-
-                        // The needle rotates to point to the Qibla relative to the current device orientation
-                        // Note: If the device is pointing N (azimuth 0), and Qibla is 90, needle points right.
-                        // If device turns right 90 deg (azimuth 90), needle should point top (0).
-                        // So needle rotation is QiblaDirection - CurrentAzimuth
-                        rotate(degrees = animatedQiblaRotation) {
-                            drawNeedle()
-                        }
-                    }
-
-                    // Center Indicator
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(PrimaryGreen),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "${uiState.qiblaDirection.toInt()}°",
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = "Back"
                         )
                     }
                 }
+            )
+        }
+    ) { padding ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+
+            Box(
+                modifier = Modifier.size(300.dp),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Canvas(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .graphicsLayer {
+                            rotationZ = animatedRotation
+                        }
+                ) {
+                    drawCompassDial()
+                }
+
+                Canvas(
+                    modifier = Modifier.matchParentSize()
+                ) {
+                    drawNeedle()
+                }
+
+                Canvas(
+                    modifier = Modifier.matchParentSize()
+                ) {
+                    rotate(animatedQiblaRotation) {
+                        drawQiblaArrow()
+                    }
+                }
+
+                Icon(
+                    painter = painterResource(R.drawable.kaaba),
+                    contentDescription = "Kaaba",
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .offset(x = 40.dp)
+                        .size(42.dp),
+                    tint = Color.Unspecified
+                )
             }
+
+            Spacer(Modifier.height(32.dp))
+
+            Text(
+                "${uiState.qiblaDirection.toInt()}° $direction",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            Text(
+                "Your Location: ",
+                color = Color.Gray,
+                fontSize = 14.sp
+            )
         }
     }
 }
 
-private fun DrawScope.drawTicks() {
-    val radius = size.minDimension / 2f
-    val center = Offset(size.width / 2f, size.height / 2f)
+
+private fun DrawScope.drawCompassDial() {
+
+    val radius = size.minDimension / 2
+    val center = Offset(size.width / 2, size.height / 2)
+
+    drawCircle(
+        color = Color.White,
+        radius = radius
+    )
 
     for (angle in 0 until 360 step 10) {
-        val isMajor = angle % 30 == 0
-        val lineLength = if (isMajor) 16.dp.toPx() else 8.dp.toPx()
-        val strokeWidth = if (isMajor) 2.dp.toPx() else 1.dp.toPx()
-        val color = if (isMajor) PrimaryGreen else Color.LightGray
 
-        rotate(degrees = angle.toFloat(), pivot = center) {
+        val lineLength =
+            if (angle % 30 == 0) 25f else 12f
+
+        rotate(angle.toFloat(), center) {
+
             drawLine(
-                color = color,
-                start = Offset(center.x, center.y - radius + 16.dp.toPx()),
-                end = Offset(center.x, center.y - radius + 16.dp.toPx() + lineLength),
-                strokeWidth = strokeWidth,
-                cap = StrokeCap.Round
+                color = Color.LightGray,
+                start = Offset(center.x, center.y - radius + 10f),
+                end = Offset(center.x, center.y - radius + lineLength),
+                strokeWidth = 3f
             )
         }
     }
 }
 
-private fun DrawScope.drawNumbers() {
-    val radius = size.minDimension / 2f
-    val center = Offset(size.width / 2f, size.height / 2f)
-
-    val paint = Paint().apply {
-        color = android.graphics.Color.parseColor("#1B5E20") // Primary Green approx
-        textSize = 12.sp.toPx()
-        textAlign = Paint.Align.CENTER
-        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        isAntiAlias = true
-    }
-
-    for (angle in 0 until 360 step 30) {
-        // We want the text to be readable (not upside down if possible, but rotating the canvas handles the whole dial)
-        // Draw at the top, and rotate the canvas
-        rotate(degrees = angle.toFloat(), pivot = center) {
-            drawContext.canvas.nativeCanvas.drawText(
-                angle.toString(),
-                center.x,
-                center.y - radius + 12.dp.toPx(),
-                paint
-            )
-        }
-    }
-}
-
-private fun DrawScope.drawDirections() {
-    val radius = size.minDimension / 2f
-    val center = Offset(size.width / 2f, size.height / 2f)
-
-    val basePaint = Paint().apply {
-        textSize = 16.sp.toPx()
-        textAlign = Paint.Align.CENTER
-        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        isAntiAlias = true
-    }
-
-    val directions = listOf(
-        Pair("N", android.graphics.Color.RED),
-        Pair("E", android.graphics.Color.DKGRAY),
-        Pair("S", android.graphics.Color.DKGRAY),
-        Pair("W", android.graphics.Color.DKGRAY)
-    )
-
-    for ((i, dir) in directions.withIndex()) {
-        val angle = i * 90f
-        val paint = Paint(basePaint).apply { color = dir.second }
-        rotate(degrees = angle, pivot = center) {
-            drawContext.canvas.nativeCanvas.drawText(
-                dir.first,
-                center.x,
-                center.y - radius + 48.dp.toPx(), // Further inside
-                paint
-            )
-        }
-    }
-}
 
 private fun DrawScope.drawNeedle() {
-    val center = Offset(size.width / 2f, size.height / 2f)
-    val needleLength = 60.dp.toPx()
-    val needleWidth = 24.dp.toPx()
 
-    // Top Triangle (Yellow)
-    val topPath = Path().apply {
-        moveTo(center.x, center.y - needleLength)
-        lineTo(center.x + needleWidth / 2f, center.y - needleLength / 2f)
-        lineTo(center.x - needleWidth / 2f, center.y - needleLength / 2f)
+    val center = Offset(size.width / 2, size.height / 2)
+
+    val north = Path().apply {
+        moveTo(center.x, center.y - 110f)
+        lineTo(center.x + 20f, center.y)
+        lineTo(center.x - 20f, center.y)
         close()
     }
 
-    // Bottom Triangle (Blue/Grey)
-    val bottomPath = Path().apply {
-        moveTo(center.x - needleWidth / 2f, center.y - needleLength / 2f)
-        lineTo(center.x + needleWidth / 2f, center.y - needleLength / 2f)
-        lineTo(center.x, center.y - 10.dp.toPx())
+    val south = Path().apply {
+        moveTo(center.x, center.y + 110f)
+        lineTo(center.x + 20f, center.y)
+        lineTo(center.x - 20f, center.y)
         close()
     }
 
-    // Light green/teal faint background shadow or wide pointer behind it
-    val shadowPath = Path().apply {
-        moveTo(center.x, center.y - needleLength - 8.dp.toPx())
-        lineTo(center.x + needleWidth, center.y - needleLength / 2f)
-        lineTo(center.x, center.y)
-        lineTo(center.x - needleWidth, center.y - needleLength / 2f)
-        close()
-    }
+    drawPath(north, Color.Blue)
+    drawPath(south, Color.Green)
 
-    drawPath(
-        path = shadowPath,
-        color = PrimaryGreen.copy(alpha = 0.2f)
+    drawCircle(
+        color = Color.Gray,
+        radius = 12f,
+        center = center
     )
+}
 
-    drawPath(
-        path = topPath,
-        color = Color(0xFFFFC107) // Yellow
-    )
 
-    drawPath(
-        path = bottomPath,
-        color = Color(0xFF607D8B) // Blue-Grey
+private fun DrawScope.drawQiblaArrow() {
+
+    val center = Offset(size.width / 2, size.height / 2)
+
+    drawLine(
+        color = Color.Black,
+        start = Offset(center.x, center.y),
+        end = Offset(size.width - 40f, center.y),
+        strokeWidth = 6f
     )
 }
