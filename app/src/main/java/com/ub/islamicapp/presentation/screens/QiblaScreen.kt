@@ -272,60 +272,30 @@ fun QiblaScreen(
                                     .border(1.dp, Color(0xFFF1F5F9), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                // Direction Arrow rotating towards Qibla
+                                // Rotating N/S/E/W Dial
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .rotate(-continuousAzimuth),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("N", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color(0xFF94A3B8), modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp))
+                                    Text("S", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color(0xFF94A3B8), modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp))
+                                    Text("W", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color(0xFF94A3B8), modifier = Modifier.align(Alignment.CenterStart).padding(start = 16.dp))
+                                    Text("E", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color(0xFF94A3B8), modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp))
+                                }
+
+                                // Rotating Center Icon (qibla_moque)
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .rotate(animatedQiblaRotation),
-                                    contentAlignment = Alignment.TopCenter
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier.padding(top = 16.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = android.R.drawable.arrow_up_float), // Placeholder until we load expand_less
-                                            contentDescription = "Direction Arrow",
-                                            tint = PrimaryGreen,
-                                            modifier = Modifier.size(48.dp)
-                                        )
-                                        Box(
-                                            modifier = Modifier
-                                                .width(4.dp)
-                                                .height(96.dp)
-                                                .background(
-                                                    brush = Brush.verticalGradient(
-                                                        colors = listOf(
-                                                            Color.Transparent,
-                                                            PrimaryGreen.copy(alpha = 0.4f),
-                                                            PrimaryGreen
-                                                        )
-                                                    ),
-                                                    shape = RoundedCornerShape(50)
-                                                )
-                                        )
-                                    }
-                                }
-
-                                // Degree Indicators (Fixed relative to the phone)
-                                Text("N", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = Color(0xFF94A3B8), modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp))
-                                Text("S", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = Color(0xFF94A3B8), modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp))
-                                Text("W", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = Color(0xFF94A3B8), modifier = Modifier.align(Alignment.CenterStart).padding(start = 16.dp))
-                                Text("E", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = Color(0xFF94A3B8), modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp))
-
-                                // Center Kaaba Icon
-                                Box(
-                                    modifier = Modifier
-                                        .size(64.dp)
-                                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp), spotColor = PrimaryGreen.copy(alpha = 0.3f))
-                                        .background(PrimaryGreen, RoundedCornerShape(16.dp)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.icon),
-                                        contentDescription = "Kaaba",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(36.dp)
+                                    androidx.compose.foundation.Image(
+                                        painter = painterResource(id = R.drawable.qibla_moque),
+                                        contentDescription = "Qibla Mosque",
+                                        modifier = Modifier.size(96.dp)
                                     )
                                 }
                             }
