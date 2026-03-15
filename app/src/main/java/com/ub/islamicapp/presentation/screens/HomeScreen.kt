@@ -106,7 +106,7 @@ fun HomeScreen(
                     )
 
                     LastReadCard(
-
+                      
                     )
 
                     if (uiState.error != "NO_LOCATION" && uiState.prayerTimes.isNotEmpty()) {
