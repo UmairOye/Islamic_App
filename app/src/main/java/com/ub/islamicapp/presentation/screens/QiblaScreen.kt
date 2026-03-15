@@ -322,7 +322,7 @@ fun QiblaScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        painter = painterResource(id = R.drawable.ic_mosque_silhouette),
+                                        painter = painterResource(id = R.drawable.icon),
                                         contentDescription = "Kaaba",
                                         tint = Color.White,
                                         modifier = Modifier.size(36.dp)
@@ -381,17 +381,17 @@ fun QiblaScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .background(PrimaryGreen.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
+//                            Box(
+//                                modifier = Modifier
+//                                    .size(56.dp)
+//                                    .background(PrimaryGreen.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+//                                contentAlignment = Alignment.Center
+//                            ) {
                                 // Decide icon based on prayer name
                                 val iconRes = when (uiState.nextPrayerName) {
-                                    "Isha" -> android.R.drawable.ic_secure // Dark mode placeholder
-                                    "Fajr", "Maghrib" -> android.R.drawable.ic_menu_camera // twilight placeholder
-                                    else -> android.R.drawable.ic_dialog_info // sunny placeholder
+                                    "Isha" -> R.drawable.isha_salah // Dark mode placeholder
+                                    "Fajr", "Maghrib" -> R.drawable.maghrib // twilight placeholder
+                                    else -> R.drawable.dhuhr_salah // sunny placeholder
                                 }
                                 Icon(
                                     painter = painterResource(id = iconRes),
@@ -399,7 +399,7 @@ fun QiblaScreen(
                                     tint = PrimaryGreen,
                                     modifier = Modifier.size(32.dp)
                                 )
-                            }
+//                            }
                             Spacer(modifier = Modifier.width(16.dp))
                             Column {
                                 Text(
