@@ -54,9 +54,7 @@ fun PrayerTimesScreen(
             .background(LightBackground)
             .padding(horizontal = 16.dp)
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
 
-        // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -69,7 +67,7 @@ fun PrayerTimesScreen(
                     Icon(
                         Icons.Rounded.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color(0xFF1E293B) // slate-800
+                        tint = Color(0xFF1E293B)
                     )
                 }
                 Text(
@@ -350,17 +348,17 @@ fun PrayerTimeItem(
         } catch (e: Exception) {}
     }
 
-    val icon: ImageVector
+    val icon: Int
     val subtitle: String
 
     when (prayerName) {
-        "Fajr" -> { icon = Icons.Rounded.WbTwilight; subtitle = "Dawn Prayer" }
-        "Sunrise" -> { icon = Icons.Rounded.WbSunny; subtitle = "No Prayer" }
-        "Dhuhr" -> { icon = Icons.Rounded.WbSunny; subtitle = "Noon Prayer" }
-        "Asr" -> { icon = Icons.Rounded.WbCloudy; subtitle = "Afternoon Prayer" }
-        "Maghrib" -> { icon = Icons.Rounded.WbShade; subtitle = "Sunset Prayer" }
-        "Isha" -> { icon = Icons.Rounded.NightsStay; subtitle = "Night Prayer" }
-        else -> { icon = Icons.Rounded.Schedule; subtitle = "Prayer" }
+        "Fajr" -> { icon = R.drawable.fajar_salah; subtitle = "Dawn Prayer" }
+        "Sunrise" -> { icon = R.drawable.sunrise_; subtitle = "No Prayer" }
+        "Dhuhr" -> { icon = R.drawable.dhuhr_salah; subtitle = "Noon Prayer" }
+        "Asr" -> { icon = R.drawable.asar_salah; subtitle = "Afternoon Prayer" }
+        "Maghrib" -> { icon = R.drawable.maghrib_salah; subtitle = "Sunset Prayer" }
+        "Isha" -> { icon = R.drawable.isha_salah; subtitle = "Night Prayer" }
+        else -> { icon = R.drawable.dhuhr_salah; subtitle = "Prayer" }
     }
 
     val backgroundColor: Color
@@ -413,20 +411,20 @@ fun PrayerTimeItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(iconBoxColor.copy(alpha = contentAlpha)),
-                    contentAlignment = Alignment.Center
-                ) {
+//                Box(
+//                    modifier = Modifier
+//                        .size(40.dp)
+//                        .clip(RoundedCornerShape(12.dp))
+//                        .background(iconBoxColor.copy(alpha = contentAlpha)),
+//                    contentAlignment = Alignment.Center
+//                ) {
                     Icon(
-                        imageVector = icon,
+                        painter = painterResource(icon),
                         contentDescription = null,
                         tint = iconColor.copy(alpha = contentAlpha),
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(40.dp)
                     )
-                }
+//                }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
