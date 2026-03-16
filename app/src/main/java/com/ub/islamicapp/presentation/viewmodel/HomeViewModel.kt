@@ -115,7 +115,7 @@ class HomeViewModel @Inject constructor(
 
                     val isCompleted = (currentHour > pHour) || (currentHour == pHour && currentMin >= pMin)
 
-                    if (!isCompleted && !foundNext) {
+                    if (!isCompleted && !foundNext && prayer.name != "Sunrise") {
                         foundNext = true
                         nextPrayerStr = prayer.name
 
