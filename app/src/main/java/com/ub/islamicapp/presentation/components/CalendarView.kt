@@ -1,34 +1,33 @@
 package com.ub.islamicapp.presentation.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.ub.islamicapp.R
 import com.ub.islamicapp.theme.PrimaryGreen
 import com.ub.islamicapp.utils.CalendarUtils
+import androidx.compose.foundation.BorderStroke
 import com.ub.islamicapp.utils.IslamicEventsProvider
 import com.ub.islamicapp.utils.MonthData
 
@@ -63,93 +62,67 @@ fun HijriCalendarView(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top Image Card
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(140.dp),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        // Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                // Using generic background color since no image is provided
-                Box(modifier = Modifier.fillMaxSize().background(Color(0xFF8B5A2B))) // Brownish placeholder
-
-                // Dark overlay to make text readable
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.4f))
+            Column {
+                Text(
+                    text = "${monthData.monthName} ${monthData.year}",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryGreen
+                    )
                 )
+                val gregorianDateText = if (monthData.gregorianMonthName != null && monthData.gregorianYear != null) {
+                    "${monthData.gregorianMonthName} ${monthData.gregorianYear}"
+                } else {
+                    "Gregorian Date"
+                }
+                Text(
+                    text = gregorianDateText,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Gray
+                    )
+                )
+            }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                IconButton(
+                    onClick = { monthOffset-- },
+                    modifier = Modifier.size(36.dp)
                 ) {
-                    val gregorianDateText = if (monthData.gregorianDayOfMonth != null && monthData.gregorianMonthName != null && monthData.gregorianYear != null) {
-                        "${monthData.gregorianDayOfMonth} ${monthData.gregorianMonthName} ${monthData.gregorianYear}"
-                    } else {
-                        "Gregorian Date"
-                    }
-                    Text(
-                        text = gregorianDateText,
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "$selectedDay ${monthData.monthName} ${monthData.year}",
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
+                    Icon(imageVector = Icons.Rounded.ChevronLeft, contentDescription = "Previous Month", tint = Color.DarkGray)
+                }
+                IconButton(
+                    onClick = { monthOffset++ },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(imageVector = Icons.Rounded.ChevronRight, contentDescription = "Next Month", tint = Color.DarkGray)
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Month Navigation
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { monthOffset-- }) {
-                Icon(imageVector = Icons.Rounded.ChevronLeft, contentDescription = "Previous Month", tint = Color.Black)
-            }
-            Text(
-                text = "${monthData.monthName} ${monthData.year}",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = Color(0xFF6B4226)),
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            IconButton(onClick = { monthOffset++ }) {
-                Icon(imageVector = Icons.Rounded.ChevronRight, contentDescription = "Next Month", tint = Color.Black)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         // Days of Week
-        val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+        val daysOfWeek = listOf("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT")
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             daysOfWeek.forEach { day ->
-                val textColor = when (day) {
-                    "Fri" -> PrimaryGreen
-                    "Sun" -> Color.Red
-                    else -> Color.DarkGray
-                }
+                val textColor = Color.Gray
                 Text(
                     text = day,
-                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
                     color = textColor,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
@@ -158,142 +131,180 @@ fun HijriCalendarView(modifier: Modifier = Modifier) {
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-        HorizontalDivider(color = Color.LightGray.copy(alpha = 0.5f))
-        Spacer(modifier = Modifier.height(16.dp))
 
         // Calendar Grid
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(7),
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                userScrollEnabled = false // Prevent grid scrolling if it fits
+                userScrollEnabled = false
             ) {
                 items(monthData.days) { day ->
                     if (day.dayOfMonth > 0) {
                         val isSelected = (day.dayOfMonth == selectedDay)
+                        val isToday = day.isToday
+                        val backgroundColor = if (isSelected) PrimaryGreen else if (isToday) PrimaryGreen.copy(alpha = 0.1f) else Color.Transparent
+                        val mainTextColor = if (isSelected) Color.White else MaterialTheme.colorScheme.onBackground
+                        val subTextColor = if (isSelected) Color.White.copy(alpha = 0.8f) else Color.Gray
 
                         Box(
                             modifier = Modifier
-                                .aspectRatio(0.7f) // Taller ratio for two dates
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(backgroundColor)
                                 .clickable { selectedDay = day.dayOfMonth },
                             contentAlignment = Alignment.Center
                         ) {
-                            if (isSelected) {
-                                // Draw the elevated card for selected state
-                                Card(
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = day.dayOfMonth.toString(),
+                                    color = mainTextColor,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = day.gregorianDay?.toString() ?: "",
+                                    color = subTextColor,
+                                    fontSize = 10.sp
+                                )
+                            }
+                            // Dot for today if not selected
+                            if (isToday && !isSelected) {
+                                Box(
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .zIndex(2f), // Bring to front
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFA07A)), // Salmon color from design
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center,
-                                        modifier = Modifier.fillMaxSize().padding(2.dp)
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(36.dp)
-                                                .background(PrimaryGreen, CircleShape),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = day.dayOfMonth.toString(),
-                                                color = Color.White,
-                                                fontSize = 20.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Text(
-                                            text = day.gregorianDay?.toString() ?: "",
-                                            color = Color.Black,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                        Text(
-                                            text = monthData.monthName.take(5),
-                                            color = Color.DarkGray,
-                                            fontSize = 10.sp
-                                        )
-                                    }
-                                }
-                            } else {
-                                // Normal unselected state
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    val mainTextColor = when {
-                                        monthData.days.indexOf(day) % 7 == 4 -> PrimaryGreen // Friday
-                                        monthData.days.indexOf(day) % 7 == 6 -> Color.Red // Sunday
-                                        else -> Color.Black
-                                    }
-
-                                    Text(
-                                        text = day.dayOfMonth.toString(),
-                                        color = mainTextColor,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    Text(
-                                        text = day.gregorianDay?.toString() ?: "",
-                                        color = Color.Gray,
-                                        fontSize = 12.sp
-                                    )
-                                }
+                                        .align(Alignment.BottomCenter)
+                                        .padding(bottom = 6.dp)
+                                        .size(4.dp)
+                                        .background(PrimaryGreen, CircleShape)
+                                )
+                            }
+                            if (isSelected) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .padding(bottom = 6.dp)
+                                        .size(4.dp)
+                                        .background(Color.White, CircleShape)
+                                )
                             }
                         }
                     } else {
-                        Box(modifier = Modifier.aspectRatio(0.7f))
+                        Box(modifier = Modifier.aspectRatio(1f))
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Optional Event Text
+        // Key Islamic Dates Section
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Key Islamic Dates",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+            )
+            Surface(
+                color = PrimaryGreen.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(4.dp)
+            ) {
+                Text(
+                    text = "Upcoming",
+                    color = PrimaryGreen,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Display dynamic event for the selected day
         if (selectedDay > 0) {
             val eventDesc = IslamicEventsProvider.getEventForDate(monthData.monthIndex, selectedDay)
             if (!eventDesc.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = PrimaryGreen.copy(alpha = 0.1f)),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Historical Event - $selectedDay ${monthData.monthName}",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = PrimaryGreen)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = eventDesc,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.DarkGray
-                        )
+                val dayStr = String.format("%02d", selectedDay)
+                val monthStr = monthData.monthName.take(8).uppercase()
+
+                // Usually an event description might have a title and a description.
+                // Since our data just provides a text description, we'll try to split it
+                // or just use the whole text if it's short.
+                val parts = eventDesc.split(" - ", limit = 2)
+                val title = if (parts.size > 1) parts[0] else "Historical Event"
+                val desc = if (parts.size > 1) parts[1] else eventDesc
+
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.1f)),
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Date Icon
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .background(PrimaryGreen, RoundedCornerShape(12.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = dayStr,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 18.sp
+                                    )
+                                    Text(
+                                        text = monthStr,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 8.sp,
+                                        letterSpacing = 0.5.sp
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            // Texts
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = title,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = desc,
+                                    color = Color.Gray,
+                                    fontSize = 14.sp,
+                                    maxLines = 2
+                                )
+                            }
+
+                            Icon(
+                                imageVector = Icons.Rounded.KeyboardArrowRight,
+                                contentDescription = "Details",
+                                tint = Color.LightGray
+                            )
+                        }
                     }
                 }
             }
         }
-
-        // Bottom Text
-        Text(
-            text = "Hijri\nCalendar\n${monthData.year}",
-            style = MaterialTheme.typography.displayLarge.copy(fontWeight = FontWeight.Black),
-            color = Color.Black,
-            textAlign = TextAlign.Start,
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 16.dp),
-            lineHeight = 60.sp
-        )
     }
 }
 
