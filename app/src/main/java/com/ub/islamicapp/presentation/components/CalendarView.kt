@@ -11,9 +11,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -200,7 +200,7 @@ fun HijriCalendarView(modifier: Modifier = Modifier) {
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Key Islamic Dates Section
         Row(
@@ -227,80 +227,91 @@ fun HijriCalendarView(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Display dynamic event for the selected day
-        if (selectedDay > 0) {
-            val eventDesc = IslamicEventsProvider.getEventForDate(monthData.monthIndex, selectedDay)
-            if (!eventDesc.isNullOrBlank()) {
-                val dayStr = String.format("%02d", selectedDay)
-                val monthStr = monthData.monthName.take(8).uppercase()
+        // Display dynamic upcoming events (up to 3 within the next month)
+        // Default to day 1 if we're viewing a future/past month to see its events,
+        // or today's date if viewing the current month.
+        val todayCell = monthData.days.find { it.isToday }
+        val startDayForEvents = todayCell?.dayOfMonth ?: 1
+        val upcomingEvents = IslamicEventsProvider.getUpcomingEvents(monthData.monthIndex, startDayForEvents, 3)
 
-                // Usually an event description might have a title and a description.
-                // Since our data just provides a text description, we'll try to split it
-                // or just use the whole text if it's short.
-                val parts = eventDesc.split(" - ", limit = 2)
+        val hijriMonthNames = arrayOf(
+            "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+            "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
+            "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            upcomingEvents.forEachIndexed { index, eventTriple ->
+                val (eventDay, eventMonthIdx, eventText) = eventTriple
+                val dayStr = String.format("%02d", eventDay)
+                val monthStr = hijriMonthNames[eventMonthIdx].take(8).uppercase()
+
+                val parts = eventText.split(" - ", limit = 2)
                 val title = if (parts.size > 1) parts[0] else "Historical Event"
-                val desc = if (parts.size > 1) parts[1] else eventDesc
+                val desc = if (parts.size > 1) parts[1] else eventText
 
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.1f)),
-                        color = MaterialTheme.colorScheme.surface
+                val isFirst = index == 0
+                val iconBgColor = if (isFirst) PrimaryGreen else PrimaryGreen.copy(alpha = 0.2f)
+                val iconTextColor = if (isFirst) Color.White else PrimaryGreen
+
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.1f)),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
+                        // Date Icon
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                .size(56.dp)
+                                .background(iconBgColor, RoundedCornerShape(12.dp)),
+                            contentAlignment = Alignment.Center
                         ) {
-                            // Date Icon
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .background(PrimaryGreen, RoundedCornerShape(12.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        text = dayStr,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 18.sp
-                                    )
-                                    Text(
-                                        text = monthStr,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 8.sp,
-                                        letterSpacing = 0.5.sp
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            // Texts
-                            Column(modifier = Modifier.weight(1f)) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = title,
+                                    text = dayStr,
+                                    color = iconTextColor,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    maxLines = 1
+                                    fontSize = 18.sp
                                 )
                                 Text(
-                                    text = desc,
-                                    color = Color.Gray,
-                                    fontSize = 14.sp,
-                                    maxLines = 2
+                                    text = monthStr,
+                                    color = iconTextColor,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 8.sp,
+                                    letterSpacing = 0.5.sp
                                 )
                             }
+                        }
 
-                            Icon(
-                                imageVector = Icons.Rounded.KeyboardArrowRight,
-                                contentDescription = "Details",
-                                tint = Color.LightGray
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        // Texts
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = title,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                maxLines = 1
+                            )
+                            Text(
+                                text = desc,
+                                color = Color.Gray,
+                                fontSize = 14.sp,
+                                maxLines = 2
                             )
                         }
+
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = "Details",
+                            tint = Color.LightGray
+                        )
                     }
                 }
             }
