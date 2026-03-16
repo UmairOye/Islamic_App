@@ -38,20 +38,11 @@ fun FeatureGrid(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             FeatureItem(label = "Quran", drawable = R.drawable.quran, onClick = { }, modifier = Modifier.weight(1f))
-            FeatureItem(label = "Adhkar ", drawable = R.drawable.adkhar, onClick = onNavigateToHijri, modifier = Modifier.weight(1f))
-            FeatureItem(label = "Salah", drawable = R.drawable.salah, onClick = onNavigateToQibla, modifier = Modifier.weight(1f))
-            FeatureItem(label = "Qibla", drawable = R.drawable.qibla, onClick = { }, modifier = Modifier.weight(1f))
-            FeatureItem(label = "Hijri", drawable = R.drawable.events, onClick = { }, modifier = Modifier.weight(1f))
+            FeatureItem(label = "Adhkar ", drawable = R.drawable.adkhar, onClick = {}, modifier = Modifier.weight(1f))
+            FeatureItem(label = "Salah", drawable = R.drawable.salah, onClick = onNavigateToSalah, modifier = Modifier.weight(1f))
+            FeatureItem(label = "Qibla", drawable = R.drawable.qibla, onClick = { onNavigateToQibla}, modifier = Modifier.weight(1f))
+            FeatureItem(label = "Hijri", drawable = R.drawable.events, onClick = { onNavigateToHijri}, modifier = Modifier.weight(1f))
         }
-
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.spacedBy(16.dp)
-//        ) {
-//            FeatureItem(label = "Tasbeeh", drawable = R.drawable.tasbeeh, onClick = { }, modifier = Modifier.weight(1f))
-//            FeatureItem(label = "Hadith", drawable = R.drawable.hadith, onClick = { }, modifier = Modifier.weight(1f))
-//
-//        }
 
 
     }
