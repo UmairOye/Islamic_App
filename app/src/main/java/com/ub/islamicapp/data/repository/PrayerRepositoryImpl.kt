@@ -68,7 +68,7 @@ class PrayerRepositoryImpl @Inject constructor(
         val timeFormat24 = SimpleDateFormat("HH:mm", Locale.getDefault())
         val currentTimeStr = timeFormat24.format(calendar.time)
 
-        val prayerNamesOrder = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+        val prayerNamesOrder = listOf("Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha")
         val prayers = mutableListOf<PrayerTime>()
 
         var nextPrayerStr = ""
@@ -93,7 +93,7 @@ class PrayerRepositoryImpl @Inject constructor(
             val isCompleted = (currentHour > pHour) || (currentHour == pHour && currentMin >= pMin)
             prayers.add(PrayerTime(name = name, time = timeStr, isCompleted = isCompleted))
 
-            if (!isCompleted && !foundNext) {
+            if (!isCompleted && !foundNext && name != "Sunrise") { // Sunrise is not considered a next prayer
                 foundNext = true
                 nextPrayerStr = name
 
