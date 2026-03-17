@@ -40,8 +40,8 @@ fun FeatureGrid(
             FeatureItem(label = "Quran", drawable = R.drawable.quran, onClick = { }, modifier = Modifier.weight(1f))
             FeatureItem(label = "Adhkar ", drawable = R.drawable.adkhar, onClick = {}, modifier = Modifier.weight(1f))
             FeatureItem(label = "Salah", drawable = R.drawable.salah, onClick = onNavigateToSalah, modifier = Modifier.weight(1f))
-            FeatureItem(label = "Qibla", drawable = R.drawable.qibla, onClick = { onNavigateToQibla}, modifier = Modifier.weight(1f))
-            FeatureItem(label = "Hijri", drawable = R.drawable.events, onClick = { onNavigateToHijri}, modifier = Modifier.weight(1f))
+            FeatureItem(label = "Qibla", drawable = R.drawable.qibla, onClick = { onNavigateToQibla()}, modifier = Modifier.weight(1f))
+            FeatureItem(label = "Hijri", drawable = R.drawable.events, onClick = { onNavigateToHijri()}, modifier = Modifier.weight(1f))
         }
 
 
