@@ -82,7 +82,7 @@ fun HomeScreen(
                     location = uiState.location,
                     currentTime = uiState.currentTime,
                     timeRemaining = uiState.timeRemaining,
-                    prayers = uiState.prayerTimes,
+                    prayers = uiState.prayerTimes.filter { it.name != "Sunrise" },
                     nextPrayer = uiState.nextPrayer,
                     isLocationError = uiState.error == "NO_LOCATION" || uiState.error != null
                 )
@@ -110,7 +110,7 @@ fun HomeScreen(
                     )
 
                     if (uiState.error != "NO_LOCATION" && uiState.prayerTimes.isNotEmpty()) {
-                        PrayerTracker(prayers = uiState.prayerTimes)
+                        PrayerTracker(prayers = uiState.prayerTimes.filter { it.name != "Sunrise" })
                     }
 
                     Spacer(modifier = Modifier.height(32.dp))
