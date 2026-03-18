@@ -50,7 +50,7 @@ object IslamicEventsProvider {
         val categories = eventsData?.get(monthKey) ?: return null
 
         for (category in categories) {
-            // Priority to Waqiat (Events) matching the day exactly
+
             category.Waqiat?.let { waqiat ->
                 val regex = Regex("\\b$day\\b")
                 val matchingWaqia = waqiat.find { event ->
@@ -61,7 +61,6 @@ object IslamicEventsProvider {
                 }
             }
 
-            // If no specific date event is found, return the first general Fazail or Amaal if it's the 1st day to show something about the month
             if (day == 1) {
                 category.Fazail?.firstOrNull()?.text?.let { return it }
                 category.Amaal?.firstOrNull()?.text?.let { return it }

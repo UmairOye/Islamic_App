@@ -22,10 +22,16 @@ fun AppNavigation() {
             GregorianCalendarScreen(navController = navController)
         }
         composable("prayer_times") {
-            com.ub.islamicapp.presentation.screens.PrayerTimesScreen(navController = navController)
+            com.ub.islamicapp.presentation.prayers.PrayerTimesScreen(navController = navController)
         }
         composable("qibla") {
             com.ub.islamicapp.presentation.screens.QiblaScreen(navController = navController)
+        }
+        composable("prayer_notifications") {
+            com.ub.islamicapp.presentation.screens.PrayerNotificationsScreen(navController = navController)
+        }
+        composable("select_location") {
+            com.ub.islamicapp.presentation.screens.SelectLocationScreen(navController = navController)
         }
     }
 }

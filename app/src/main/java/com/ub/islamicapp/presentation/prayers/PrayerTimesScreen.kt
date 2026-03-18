@@ -1,4 +1,4 @@
-package com.ub.islamicapp.presentation.screens
+package com.ub.islamicapp.presentation.prayers
 
 import android.R.attr.shadowColor
 import androidx.compose.foundation.Image
@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.material3.FloatingActionButtonDefaults.elevation
@@ -65,7 +66,7 @@ fun PrayerTimesScreen(
             .fillMaxSize()
             .background(LightBackground)
             .statusBarsPadding().navigationBarsPadding()
-//            .padding(horizontal = 16.dp)
+
     ) {
 
         Row(
@@ -78,7 +79,7 @@ fun PrayerTimesScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(
-                        Icons.Rounded.ArrowBack,
+                        Icons.AutoMirrored.Rounded.ArrowBack,
                         contentDescription = "Back",
                         tint = Color(0xFF1E293B)
                     )
@@ -99,7 +100,7 @@ fun PrayerTimesScreen(
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(PrimaryGreen.copy(alpha = 0.1f))
-                        .clickable { },
+                        .clickable { navController.navigate("prayer_notifications") },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(Icons.Rounded.Notifications, contentDescription = "Notifications", tint = PrimaryGreen)
@@ -109,7 +110,7 @@ fun PrayerTimesScreen(
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(PrimaryGreen.copy(alpha = 0.1f))
-                        .clickable { },
+                        .clickable { navController.navigate("select_location") },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(Icons.Rounded.LocationOn, contentDescription = "Location", tint = PrimaryGreen)
@@ -117,7 +118,6 @@ fun PrayerTimesScreen(
             }
         }
 
-        // Hero Section (Next Prayer)
         HeroSection(
             nextPrayer = uiState.nextPrayer,
             timeRemaining = uiState.timeRemaining,
@@ -128,7 +128,6 @@ fun PrayerTimesScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Today's Schedule Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -141,7 +140,7 @@ fun PrayerTimesScreen(
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
-                    color = Color(0xFF0F172A) // slate-900
+                    color = Color(0xFF0F172A)
                 )
             )
             Text(
@@ -154,7 +153,6 @@ fun PrayerTimesScreen(
             )
         }
 
-        // Prayer List
         LazyColumn(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -180,7 +178,7 @@ fun HeroSection(
     location: String,
     prayerTimes: List<com.ub.islamicapp.presentation.state.PrayerTime>
 ) {
-    // Determine the target time for the next prayer
+
     var nextPrayerTimeStr = ""
     var nextPrayerAmPm = ""
 
@@ -196,7 +194,6 @@ fun HeroSection(
         } catch (e: Exception) {}
     }
 
-    // Get current gregorian date formatted
     val calendar = Calendar.getInstance()
     val dateFormat = SimpleDateFormat("EEEE, MMM d", Locale.getDefault())
     val gregorianDate = dateFormat.format(calendar.time)
@@ -220,7 +217,7 @@ fun HeroSection(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // "UP NEXT" Pill
+
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
@@ -240,10 +237,6 @@ fun HeroSection(
 
             Text(
                 text = if (nextPrayer == "--") "Loading" else nextPrayer,
-//                style = MaterialTheme.typography.headlineMedium.copy(
-//                    fontWeight = FontWeight.Light,
-//                    color = Color.White
-//                )
 
                 fontSize = 30.sp,
                 fontFamily = InterFontFamily,
@@ -275,7 +268,6 @@ fun HeroSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // "Starts in ..." Pill
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
@@ -392,19 +384,19 @@ fun PrayerTimeItem(
         titleColor = PrimaryGreen
         timeColor = PrimaryGreen
     } else if (prayerName == "Sunrise") {
-        backgroundColor = Color(0xFFF1F5F9).copy(alpha = 0.5f) // slate-100
+        backgroundColor = Color(0xFFF1F5F9).copy(alpha = 0.5f)
         borderColor = Color.Transparent
-        iconBoxColor = Color(0xFFE2E8F0) // slate-200
-        iconColor = Color(0xFF64748B) // slate-500
-        titleColor = Color(0xFF64748B) // slate-500
-        timeColor = Color(0xFF64748B) // slate-500
+        iconBoxColor = Color(0xFFE2E8F0)
+        iconColor = Color(0xFF64748B)
+        titleColor = Color(0xFF64748B)
+        timeColor = Color(0xFF64748B)
     } else {
         backgroundColor = Color.White
         borderColor = PrimaryGreen.copy(alpha = 0.05f)
         iconBoxColor = PrimaryGreen.copy(alpha = 0.05f)
         iconColor = PrimaryGreen
-        titleColor = Color(0xFF0F172A) // slate-900
-        timeColor = Color(0xFF334155) // slate-700
+        titleColor = Color(0xFF0F172A)
+        timeColor = Color(0xFF334155)
     }
 
     val contentAlpha = if (prayerName == "Sunrise") 0.7f else 1f
@@ -455,7 +447,7 @@ fun PrayerTimeItem(
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.labelSmall.copy(
-                            color = if (isNext) PrimaryGreen.copy(alpha = 0.7f) else Color(0xFF64748B).copy(alpha = contentAlpha) // slate-500
+                            color = if (isNext) PrimaryGreen.copy(alpha = 0.7f) else Color(0xFF64748B).copy(alpha = contentAlpha)
                         )
                     )
                 }
@@ -482,7 +474,7 @@ fun PrayerTimeItem(
                 Icon(
                     imageVector = if (isNext) Icons.Rounded.NotificationsActive else if (isCompleted) Icons.Rounded.NotificationsOff else Icons.Rounded.Notifications,
                     contentDescription = "Notification",
-                    tint = if (isNext) PrimaryGreen else Color(0xFF94A3B8).copy(alpha = contentAlpha), // slate-400
+                    tint = if (isNext) PrimaryGreen else Color(0xFF94A3B8).copy(alpha = contentAlpha),
                     modifier = Modifier.size(20.dp)
                 )
             }

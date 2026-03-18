@@ -32,7 +32,7 @@ fun FeatureGrid(
             modifier = Modifier.padding(top = 16.dp),
             fontSize = 16.sp,
         )
-        
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -43,7 +43,6 @@ fun FeatureGrid(
             FeatureItem(label = "Qibla", drawable = R.drawable.qibla, onClick = { onNavigateToQibla}, modifier = Modifier.weight(1f))
             FeatureItem(label = "Hijri", drawable = R.drawable.events, onClick = { onNavigateToHijri}, modifier = Modifier.weight(1f))
         }
-
 
     }
 }
