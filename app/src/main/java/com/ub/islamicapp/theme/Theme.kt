@@ -49,7 +49,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun IslamicAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
@@ -72,7 +72,6 @@ fun IslamicAppTheme(
     controller.hide(WindowInsetsCompat.Type.navigationBars())
     controller.systemBarsBehavior =
         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
 
     MaterialTheme(
         colorScheme = colorScheme,

@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "location_cache")
 data class LocationEntity(
-    @PrimaryKey val id: Int = 1, // Only 1 row needed
+    @PrimaryKey val id: Int = 1,
     val latitude: Double,
     val longitude: Double
 )

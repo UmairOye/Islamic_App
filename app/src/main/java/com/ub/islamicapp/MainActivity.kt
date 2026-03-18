@@ -20,8 +20,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             IslamicAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Set up initial navigation
-                    Modifier.padding(innerPadding) // Just a dummy use of padding, Navigation will take care
+
+                    Modifier.padding(innerPadding)
                     AppNavigation()
                 }
             }

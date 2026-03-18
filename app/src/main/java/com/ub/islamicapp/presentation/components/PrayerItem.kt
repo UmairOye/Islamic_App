@@ -41,9 +41,7 @@ fun PrayerItem(
     ) {
         Text(
             text = prayer.name,
-//            style = MaterialTheme.typography.labelMedium.copy(
-//                fontWeight = if (isNext) FontWeight.Bold else FontWeight.Normal
-//            ),
+
             fontWeight = if (isNext) FontWeight.Medium else FontWeight.Normal,
             fontFamily = InterFontFamily,
             fontSize = 10.sp,
