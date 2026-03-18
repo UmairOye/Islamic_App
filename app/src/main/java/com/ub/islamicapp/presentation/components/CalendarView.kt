@@ -62,7 +62,7 @@ fun HijriCalendarView(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
+//            .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -133,7 +133,7 @@ fun HijriCalendarView(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(8.dp))
 
         // Calendar Grid
-        Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
+        Box(modifier = Modifier.fillMaxWidth()) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(7),
                 modifier = Modifier.fillMaxSize(),
@@ -178,7 +178,7 @@ fun HijriCalendarView(modifier: Modifier = Modifier) {
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.BottomCenter)
-                                        .padding(bottom = 6.dp)
+                                        .padding(bottom = 16.dp)
                                         .size(4.dp)
                                         .background(PrimaryGreen, CircleShape)
                                 )
@@ -200,7 +200,6 @@ fun HijriCalendarView(modifier: Modifier = Modifier) {
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
 
         // Key Islamic Dates Section
         Row(
