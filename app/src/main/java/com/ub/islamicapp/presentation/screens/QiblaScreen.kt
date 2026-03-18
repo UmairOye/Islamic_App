@@ -89,7 +89,6 @@ fun QiblaScreen(
         }
     }
 
-    // Sensor listener
     DisposableEffect(uiState.hasSensors) {
         val sensorEventListener = object : SensorEventListener {
             var lastAccelerometer = FloatArray(3)
@@ -169,42 +168,40 @@ fun QiblaScreen(
         label = "qibla_rotation"
     )
 
-    Scaffold(
-        containerColor = LightBackground,
-        topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = { navController.popBackStack() },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color(0xFF1E293B)
-                    )
-                }
-                Text(
-                    text = "Qibla Direction",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E293B)
-                    ),
-                    modifier = Modifier.padding(start = 8.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(LightBackground)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color(0xFF1E293B)
                 )
             }
+            Text(
+                text = "Qibla Direction",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+            )
         }
-    ) { padding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
         ) {
-            // Main Content: Qibla Compass
+
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -247,14 +244,13 @@ fun QiblaScreen(
                                 .aspectRatio(1f),
                             contentAlignment = Alignment.Center
                         ) {
-                            // Outer Decorative Ring
+
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .border(2.dp, PrimaryGreen.copy(alpha = 0.1f), CircleShape)
                             )
 
-                            // Tick Marks Ring (simulated with Canvas)
                             Canvas(
                                 modifier = Modifier
                                     .fillMaxSize(0.9f)
@@ -263,7 +259,6 @@ fun QiblaScreen(
                                 drawCompassTicks()
                             }
 
-                            // Inner Compass Circle
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize(0.72f)
@@ -272,7 +267,7 @@ fun QiblaScreen(
                                     .border(1.dp, Color(0xFFF1F5F9), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                // Rotating N/S/E/W Dial
+
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -285,7 +280,6 @@ fun QiblaScreen(
                                     Text("E", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color(0xFF94A3B8), modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp))
                                 }
 
-                                // Rotating Center Icon (qibla_moque)
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -331,7 +325,6 @@ fun QiblaScreen(
                 }
             }
 
-            // Bottom Prayer Card
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -351,17 +344,15 @@ fun QiblaScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-//                            Box(
-//                                modifier = Modifier
-//                                    .size(56.dp)
-//                                    .background(PrimaryGreen.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
-//                                contentAlignment = Alignment.Center
-//                            ) {
-                                // Decide icon based on prayer name
+
                                 val iconRes = when (uiState.nextPrayerName) {
-                                    "Isha" -> R.drawable.isha_salah // Dark mode placeholder
-                                    "Fajr", "Maghrib" -> R.drawable.maghrib // twilight placeholder
-                                    else -> R.drawable.dhuhr_salah // sunny placeholder
+                                    "Fajr" -> R.drawable.fajar_salah
+                                    "Sunrise" -> R.drawable.sunrise_
+                                    "Dhuhr" -> R.drawable.dhuhr_salah
+                                    "Asr" -> R.drawable.asar_salah
+                                    "Maghrib" -> R.drawable.maghrib_salah
+                                    "Isha" -> R.drawable.isha_salah
+                                    else -> R.drawable.dhuhr_salah
                                 }
                                 Icon(
                                     painter = painterResource(id = iconRes),
@@ -369,7 +360,7 @@ fun QiblaScreen(
                                     tint = PrimaryGreen,
                                     modifier = Modifier.size(32.dp)
                                 )
-//                            }
+
                             Spacer(modifier = Modifier.width(16.dp))
                             Column {
                                 Text(
@@ -431,7 +422,6 @@ fun QiblaScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Location Indicator
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,

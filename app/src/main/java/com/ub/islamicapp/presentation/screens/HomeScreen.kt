@@ -73,20 +73,16 @@ fun HomeScreen(
                     .fillMaxSize()
                     .verticalScroll(scrollState)
             ) {
-//                val headerHeightDp = with(density) { headerHeightPx.toDp() }
-//                Spacer(modifier = Modifier.height(headerHeightDp))
-
 
                 HomeTopHeader(
                     hijriDate = uiState.hijriDate,
                     location = uiState.location,
                     currentTime = uiState.currentTime,
                     timeRemaining = uiState.timeRemaining,
-                    prayers = uiState.prayerTimes,
+                    prayers = uiState.prayerTimes.filter { it.name != "Sunrise" },
                     nextPrayer = uiState.nextPrayer,
                     isLocationError = uiState.error == "NO_LOCATION" || uiState.error != null
                 )
-
 
                 Column(
                     modifier = Modifier
@@ -106,11 +102,11 @@ fun HomeScreen(
                     )
 
                     LastReadCard(
-                      
+
                     )
 
                     if (uiState.error != "NO_LOCATION" && uiState.prayerTimes.isNotEmpty()) {
-                        PrayerTracker(prayers = uiState.prayerTimes)
+                        PrayerTracker(prayers = uiState.prayerTimes.filter { it.name != "Sunrise" })
                     }
 
                     Spacer(modifier = Modifier.height(32.dp))

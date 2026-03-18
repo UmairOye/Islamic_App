@@ -33,7 +33,6 @@ fun FeatureItem(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-
         Box(
             modifier = Modifier
                 .aspectRatio(1f)

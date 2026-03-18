@@ -27,20 +27,19 @@ class HomeViewModel @Inject constructor(
     private var pollingJob: Job? = null
 
     init {
-        // Start polling immediately for system time updates even if location is not resolved
+
         startPollingTime()
     }
 
     fun updateLocationAndPrayers() {
         viewModelScope.launch {
-            // Only fetch if we haven't successfully fetched today, or if we want to ensure it's loaded.
-            // Since this app targets caching, we should check if prayers are already loaded
+
             if (_uiState.value.prayerTimes.isNotEmpty() && _uiState.value.prayerTimes.first().time != "--:--") {
                 return@launch
             }
 
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            
+
             val location = locationTracker.getCurrentLocation()
             if (location != null) {
                 val result = getPrayerTimesUseCase(location.latitude, location.longitude)
@@ -66,7 +65,7 @@ class HomeViewModel @Inject constructor(
                     }
                 )
             } else {
-                // If location doesn't exist at all, update the current system time anyway
+
                 val currentTimeStr = java.text.SimpleDateFormat("hh:mm", java.util.Locale.getDefault()).format(java.util.Calendar.getInstance().time)
                 val hijriStr = try {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
@@ -83,7 +82,7 @@ class HomeViewModel @Inject constructor(
                     isLoading = false,
                     currentTime = currentTimeStr,
                     hijriDate = hijriStr,
-                    error = "NO_LOCATION" // Specific error code to show placeholder UI
+                    error = "NO_LOCATION"
                 )
             }
         }
@@ -93,7 +92,7 @@ class HomeViewModel @Inject constructor(
         pollingJob?.cancel()
         pollingJob = viewModelScope.launch {
             while (true) {
-                // Update time locally without relying on location fetching/network to prevent sticking
+
                 val cal = java.util.Calendar.getInstance()
                 val currentTimeStr = java.text.SimpleDateFormat("hh:mm", java.util.Locale.getDefault()).format(cal.time)
 
@@ -105,10 +104,9 @@ class HomeViewModel @Inject constructor(
                 var nextPrayerStr = _uiState.value.nextPrayer
                 var foundNext = false
 
-                // Recalculate remaining time and completed status based on previously fetched prayer times
                 val updatedPrayers = _uiState.value.prayerTimes.map { prayer ->
                     if (prayer.time == "--:--") return@map prayer
-                    // The time stored in the state is now what was returned from the UseCase/Repository, which is 24-hour format
+
                     val parts = prayer.time.split(":")
                     val pHour = parts[0].toInt()
                     val pMin = parts[1].toInt()
@@ -152,9 +150,6 @@ class HomeViewModel @Inject constructor(
                     newTimeRemaining = "${firstPrayer.name} $hoursRem hour $minsRem min left"
                 }
 
-                // Format the updated prayer times to 12-hour for UI display only (we keep 24h format in the state for math, but we can't if we use the same state variable, let's keep 24h in state and format in UI)
-                // Wait, if we keep 24-hour in the state, the UI will just display it. Let's fix the UI component to format it.
-
                 _uiState.value = _uiState.value.copy(
                     currentTime = currentTimeStr,
                     timeRemaining = newTimeRemaining,
@@ -162,7 +157,7 @@ class HomeViewModel @Inject constructor(
                     prayerTimes = updatedPrayers
                 )
 
-                delay(10_000) // Poll every 10 seconds for smooth update locally
+                delay(10_000)
             }
         }
     }

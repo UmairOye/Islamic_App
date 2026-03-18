@@ -36,7 +36,7 @@ fun PrayerTracker(
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-        
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()

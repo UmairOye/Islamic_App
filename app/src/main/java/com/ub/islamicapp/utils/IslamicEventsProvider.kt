@@ -50,7 +50,7 @@ object IslamicEventsProvider {
         val categories = eventsData?.get(monthKey) ?: return null
 
         for (category in categories) {
-            // Priority to Waqiat (Events) matching the day exactly
+
             category.Waqiat?.let { waqiat ->
                 val regex = Regex("\\b$day\\b")
                 val matchingWaqia = waqiat.find { event ->
@@ -61,7 +61,6 @@ object IslamicEventsProvider {
                 }
             }
 
-            // If no specific date event is found, return the first general Fazail or Amaal if it's the 1st day to show something about the month
             if (day == 1) {
                 category.Fazail?.firstOrNull()?.text?.let { return it }
                 category.Amaal?.firstOrNull()?.text?.let { return it }
@@ -69,55 +68,5 @@ object IslamicEventsProvider {
         }
 
         return null
-    }
-
-    /**
-     * Retrieves up to [limit] upcoming events starting from the given [startDay] in the [startMonthIndex]
-     * up to one month ahead. Returns a list of Triple<Int, Int, String> where Triple(Day, MonthIndex, Text).
-     */
-    fun getUpcomingEvents(startMonthIndex: Int, startDay: Int, limit: Int = 3): List<Triple<Int, Int, String>> {
-        val results = mutableListOf<Triple<Int, Int, String>>()
-        if (eventsData == null) return results
-
-        // Search in the current month starting from startDay
-        val currentMonthKey = (startMonthIndex + 1).toString()
-        var currentWaqiat = eventsData?.get(currentMonthKey)?.firstOrNull()?.Waqiat ?: emptyList()
-
-        for (event in currentWaqiat) {
-            if (event.date != null) {
-                // Try to extract the day from the date string (e.g., "10 Muharram 1824 BC" -> 10)
-                val dayMatch = Regex("^\\s*(\\d+)\\b").find(event.date)
-                if (dayMatch != null) {
-                    val eventDay = dayMatch.groupValues[1].toInt()
-                    if (eventDay >= startDay) {
-                        results.add(Triple(eventDay, startMonthIndex, event.text))
-                        if (results.size >= limit) return results
-                    }
-                }
-            }
-        }
-
-        // If we still need more, check the next month
-        if (results.size < limit) {
-            val nextMonthIndex = (startMonthIndex + 1) % 12
-            val nextMonthKey = (nextMonthIndex + 1).toString()
-            val nextWaqiat = eventsData?.get(nextMonthKey)?.firstOrNull()?.Waqiat ?: emptyList()
-
-            for (event in nextWaqiat) {
-                if (event.date != null) {
-                    val dayMatch = Regex("^\\s*(\\d+)\\b").find(event.date)
-                    if (dayMatch != null) {
-                        val eventDay = dayMatch.groupValues[1].toInt()
-                        // Only consider events up to the startDay in the next month (to keep within 1 month window)
-                        if (eventDay <= startDay) {
-                            results.add(Triple(eventDay, nextMonthIndex, event.text))
-                            if (results.size >= limit) return results
-                        }
-                    }
-                }
-            }
-        }
-
-        return results
     }
 }

@@ -60,13 +60,12 @@ class DefaultLocationTracker @Inject constructor(
             }
 
             if (location != null) {
-                // Save to Room cache
+
                 locationDao.insertLocation(LocationEntity(latitude = location.latitude, longitude = location.longitude))
                 return location
             }
         }
 
-        // Return from cache if GPS fails or is disabled
         val cachedLocation = locationDao.getLastLocation()
 
         if (cachedLocation != null) {

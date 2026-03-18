@@ -35,10 +35,9 @@ object CalendarUtils {
         val daysInMonth = calendar.getActualMaximum(java.util.Calendar.DAY_OF_MONTH)
         calendar.set(java.util.Calendar.DAY_OF_MONTH, 1)
 
-        // Adjust so Sunday is the first day of the week
-        // get(DAY_OF_WEEK) returns Sunday=1, Monday=2, ... Saturday=7
-        val firstDayOfWeek = calendar.get(java.util.Calendar.DAY_OF_WEEK)
-        val emptyPrefixCount = firstDayOfWeek - 1 // Sunday=0 empty, Monday=1 empty... Saturday=6 empty
+        var firstDayOfWeek = calendar.get(java.util.Calendar.DAY_OF_WEEK) - 1
+        if (firstDayOfWeek == 0) firstDayOfWeek = 7
+        val emptyPrefixCount = firstDayOfWeek - 1
 
         val days = mutableListOf<CalendarDay>()
 
@@ -83,9 +82,9 @@ object CalendarUtils {
             val daysInMonth = calendar.getActualMaximum(IslamicCalendar.DAY_OF_MONTH)
             calendar.set(IslamicCalendar.DAY_OF_MONTH, 1)
 
-            // Adjust so Sunday is the first day of the week
-            val firstDayOfWeek = calendar.get(IslamicCalendar.DAY_OF_WEEK)
-            val emptyPrefixCount = firstDayOfWeek - 1 // Sunday=0, Monday=1, ... Saturday=6
+            var firstDayOfWeek = calendar.get(IslamicCalendar.DAY_OF_WEEK) - 1
+            if (firstDayOfWeek == 0) firstDayOfWeek = 7
+            val emptyPrefixCount = firstDayOfWeek - 1
 
             val days = mutableListOf<CalendarDay>()
             for (i in 0 until emptyPrefixCount) {
@@ -106,7 +105,6 @@ object CalendarUtils {
                  days.add(CalendarDay(0, null, false, false))
             }
 
-            // Get Gregorian details for the current displayed day (let's say the 1st of the Hijri month)
             calendar.set(IslamicCalendar.DAY_OF_MONTH, 1)
             val gregorianHeaderDate = java.util.Calendar.getInstance()
             gregorianHeaderDate.timeInMillis = calendar.timeInMillis
