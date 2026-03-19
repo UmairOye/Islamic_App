@@ -77,4 +77,8 @@ class DefaultLocationTracker @Inject constructor(
 
         return null
     }
+
+    override suspend fun saveManualLocation(lat: Double, lng: Double) {
+        locationDao.insertLocation(LocationEntity(latitude = lat, longitude = lng))
+    }
 }

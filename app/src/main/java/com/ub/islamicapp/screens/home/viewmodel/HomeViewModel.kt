@@ -34,6 +34,7 @@ class HomeViewModel @Inject constructor(
     fun saveLocationAndFetchPrayers(lat: Double, lng: Double, cityName: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            locationTracker.saveManualLocation(lat, lng)
             val result = getPrayerTimesUseCase(lat, lng)
             result.fold(
                 onSuccess = { prayerTimes ->
