@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.ub.islamicapp.R
 import com.ub.islamicapp.screens.notifications.components.IconBox
@@ -32,12 +33,12 @@ fun PrayerNotificationsScreen(navController: NavController) {
     var globalNotificationsEnabled by remember { mutableStateOf(true) }
 
     val prayers = listOf(
-        PrayerUiData("Fajr", "Dawn prayer", R.drawable.fajar_salah, ThemeLightGreenBg, ThemeDarkGreenIcon),
-        PrayerUiData("Sunrise", "End of Fajr time", R.drawable.sunrise_, ThemeLightOrangeBg, ThemeDarkOrangeIcon, initialOption = "None"),
-        PrayerUiData("Dhuhr", "Noon prayer", R.drawable.dhuhr_salah, ThemeLightGreenBg, ThemeDarkGreenIcon),
-        PrayerUiData("Asr", "Afternoon prayer", R.drawable.asar_salah, ThemeLightGreenBg, ThemeDarkGreenIcon),
-        PrayerUiData("Maghrib", "Sunset prayer", R.drawable.maghrib_salah, ThemeLightGreenBg, ThemeDarkGreenIcon),
-        PrayerUiData("Isha", "Night prayer", R.drawable.isha_salah, ThemeLightGreenBg, ThemeDarkGreenIcon)
+        PrayerUiData(stringResource(R.string.prayer_fajr), stringResource(R.string.subtitle_fajr), R.drawable.fajar_salah, ThemeLightGreenBg, ThemeDarkGreenIcon),
+        PrayerUiData(stringResource(R.string.prayer_sunrise), stringResource(R.string.subtitle_sunrise), R.drawable.sunrise_, ThemeLightOrangeBg, ThemeDarkOrangeIcon, initialOption = "None"),
+        PrayerUiData(stringResource(R.string.prayer_dhuhr), stringResource(R.string.subtitle_dhuhr), R.drawable.dhuhr_salah, ThemeLightGreenBg, ThemeDarkGreenIcon),
+        PrayerUiData(stringResource(R.string.prayer_asr), stringResource(R.string.subtitle_asr), R.drawable.asar_salah, ThemeLightGreenBg, ThemeDarkGreenIcon),
+        PrayerUiData(stringResource(R.string.prayer_maghrib), stringResource(R.string.subtitle_maghrib), R.drawable.maghrib_salah, ThemeLightGreenBg, ThemeDarkGreenIcon),
+        PrayerUiData(stringResource(R.string.prayer_isha), stringResource(R.string.subtitle_isha), R.drawable.isha_salah, ThemeLightGreenBg, ThemeDarkGreenIcon)
     )
 
     Scaffold(
@@ -47,7 +48,7 @@ fun PrayerNotificationsScreen(navController: NavController) {
                 TopAppBar(
                     title = {
                         Text(
-                            text = "Prayer Notifications",
+                            text = stringResource(R.string.nav_prayer_notifications),
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF0F172A),
@@ -75,7 +76,7 @@ fun PrayerNotificationsScreen(navController: NavController) {
 
             item {
                 Spacer(modifier = Modifier.height(24.dp))
-                SectionHeader("GENERAL SETTINGS")
+                SectionHeader(stringResource(R.string.general_settings))
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
@@ -94,12 +95,12 @@ fun PrayerNotificationsScreen(navController: NavController) {
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
-                                text = "Enable All Notifications",
+                                text = stringResource(R.string.enable_all_notifications),
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
                                 color = Color(0xFF0F172A)
                             )
                             Text(
-                                text = "Global toggle for all prayer alerts",
+                                text = stringResource(R.string.global_toggle_desc),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = ThemeGrayText
                             )
@@ -119,7 +120,7 @@ fun PrayerNotificationsScreen(navController: NavController) {
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
-                SectionHeader("PRAYER REMINDERS")
+                SectionHeader(stringResource(R.string.prayer_reminders))
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
@@ -135,14 +136,14 @@ fun PrayerNotificationsScreen(navController: NavController) {
                 HorizontalDivider(color = ThemeDivider, thickness = 1.dp)
                 Spacer(modifier = Modifier.height(24.dp))
 
-                SettingsActionItem(title = "Adhan Audio Selection", icon = Icons.Rounded.VolumeUp)
+                SettingsActionItem(title = stringResource(R.string.adhan_audio_selection), icon = Icons.Rounded.VolumeUp)
                 Spacer(modifier = Modifier.height(12.dp))
-                SettingsActionItem(title = "Pre-Prayer Reminders", icon = Icons.Rounded.Timer)
+                SettingsActionItem(title = stringResource(R.string.pre_prayer_reminders), icon = Icons.Rounded.Timer)
 
                 Spacer(modifier = Modifier.height(40.dp))
 
                 Text(
-                    text = "Settings are saved automatically based on your current\nlocation and time zone.",
+                    text = stringResource(R.string.settings_saved_auto),
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontStyle = FontStyle.Italic,
                         color = Color(0xFF94A3B8)

@@ -11,7 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.ub.islamicapp.R
 import com.ub.islamicapp.screens.calendar.components.CalendarView
 import com.ub.islamicapp.theme.LightBackground
 
@@ -37,7 +39,7 @@ fun HijriCalendarScreen(navController: NavController) {
                 )
             }
             Text(
-                text = "Hijri Calendar",
+                text = stringResource(R.string.cal_hijri_title),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1E293B)
@@ -73,7 +75,7 @@ fun GregorianCalendarScreen(navController: NavController) {
                 )
             }
             Text(
-                text = "Gregorian Calendar",
+                text = stringResource(R.string.cal_gregorian_title),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1E293B)

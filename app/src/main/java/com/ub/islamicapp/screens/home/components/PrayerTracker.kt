@@ -16,7 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ub.islamicapp.R
 import com.ub.islamicapp.domain.model.PrayerTime
 import com.ub.islamicapp.theme.PrimaryGreen
 
@@ -31,7 +33,7 @@ fun PrayerTracker(
             .padding(horizontal = 24.dp)
     ) {
         Text(
-            text = "Prayer Tracker",
+            text = stringResource(R.string.prayer_tracker_title),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 12.dp)

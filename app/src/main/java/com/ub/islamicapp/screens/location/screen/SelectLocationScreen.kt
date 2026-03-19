@@ -26,6 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.ub.islamicapp.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ub.islamicapp.screens.home.viewmodel.HomeViewModel
@@ -72,7 +74,7 @@ fun SelectLocationScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = "Select Location",
+                            text = stringResource(R.string.title_select_location),
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF0F172A),
@@ -124,7 +126,7 @@ fun SelectLocationScreen(
                         Icon(Icons.Rounded.MyLocation, contentDescription = "Detect", tint = ThemeDarkGreenIcon, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Detect My Location",
+                            text = stringResource(R.string.detect_my_location),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = ThemeDarkGreenIcon
                         )
@@ -135,7 +137,7 @@ fun SelectLocationScreen(
 
                 if (uiState.recentCities.isNotEmpty()) {
                     Text(
-                        text = "RECENT CITIES",
+                        text = stringResource(R.string.recent_cities),
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 1.sp,
@@ -162,7 +164,7 @@ fun SelectLocationScreen(
             item {
                 Spacer(modifier = Modifier.height(32.dp))
                 Text(
-                    text = "POPULAR CITIES",
+                    text = stringResource(R.string.popular_cities),
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 1.sp,
@@ -191,7 +193,7 @@ fun SelectLocationScreen(
                 item {
                     Spacer(modifier = Modifier.height(32.dp))
                     Text(
-                        text = "Your location is used to calculate accurate prayer times and\nQibla direction.",
+                        text = stringResource(R.string.location_usage_description),
                         style = MaterialTheme.typography.labelMedium.copy(
                             color = Color(0xFF94A3B8)
                         ),

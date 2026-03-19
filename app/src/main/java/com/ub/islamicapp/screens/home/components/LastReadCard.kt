@@ -11,9 +11,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ub.islamicapp.R
@@ -45,14 +45,14 @@ fun LastReadCard(
             Column {
 
                 Text(
-                    text = "Ayat of the Moment",
+                    text = stringResource(R.string.ayat_of_the_moment_title),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
 
                 Text(
-                    text = "Surah-Al-Baqarah [3-4]",
+                    text = stringResource(R.string.ayat_of_the_moment_reference),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.White
@@ -60,7 +60,7 @@ fun LastReadCard(
 
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "وَ الَّذِیْنَ یُؤْمِنُوْنَ بِمَاۤ اُنْزِلَ اِلَیْكَ وَ مَاۤ اُنْزِلَ مِنْ قَبْلِكَۚ-وَ بِالْاٰخِرَةِ هُمْ یُوْقِنُوْنَﭤ ",
+                    text = stringResource(R.string.ayat_of_the_moment_arabic),
                     fontSize = 26.sp,
 
                     color = Color.White

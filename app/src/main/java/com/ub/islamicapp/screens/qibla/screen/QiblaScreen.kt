@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -189,7 +190,7 @@ fun QiblaScreen(
                 )
             }
             Text(
-                text = "Qibla Direction",
+                text = stringResource(R.string.qibla_direction_title),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1E293B)
@@ -211,14 +212,14 @@ fun QiblaScreen(
             ) {
                 if (!uiState.hasSensors) {
                     Text(
-                        text = "Your device doesn't support compass sensors required for Qibla direction.",
+                        text = stringResource(R.string.qibla_no_compass),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center
                     )
                 } else if (!uiState.hasLocationPermission) {
                      Text(
-                        text = "Location permission is required to calculate accurate Qibla direction.",
+                        text = stringResource(R.string.qibla_permission_required),
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center
                     )
@@ -227,7 +228,7 @@ fun QiblaScreen(
                          CircularProgressIndicator(color = PrimaryGreen)
                          Spacer(modifier = Modifier.height(16.dp))
                          Text(
-                            text = "Calculating Qibla direction...",
+                            text = stringResource(R.string.calculating_qibla),
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center
                         )
@@ -311,7 +312,7 @@ fun QiblaScreen(
                         }
 
                         Text(
-                            text = "Turn your phone to align",
+                            text = stringResource(R.string.turn_phone_align),
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                             color = Color(0xFF64748B)
                         )
@@ -407,7 +408,7 @@ fun QiblaScreen(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "LOCAL TIME",
+                                    text = stringResource(R.string.local_time),
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontWeight = FontWeight.Medium,
                                         fontSize = 10.sp,

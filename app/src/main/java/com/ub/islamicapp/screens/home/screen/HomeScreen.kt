@@ -1,7 +1,11 @@
 package com.ub.islamicapp.screens.home.screen
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -10,10 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +29,22 @@ import com.ub.islamicapp.screens.home.viewmodel.HomeViewModel
 import com.ub.islamicapp.theme.LightBackground
 import com.ub.islamicapp.theme.PrimaryGreen
 
+private const val PREFS_NAME = "location_prefs"
+private const val KEY_DENIAL_COUNT = "denial_count"
+
+private fun getDenialCount(context: Context): Int {
+    return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getInt(KEY_DENIAL_COUNT, 0)
+}
+
+private fun incrementDenialCount(context: Context) {
+    val count = getDenialCount(context)
+    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().putInt(KEY_DENIAL_COUNT, count + 1).apply()
+}
+
+private fun clearDenialCount(context: Context) {
+    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().remove(KEY_DENIAL_COUNT).apply()
+}
+
 @Composable
 fun HomeScreen(
     navController: NavController,
@@ -37,29 +54,43 @@ fun HomeScreen(
     val scrollState = rememberScrollState()
     val context = LocalContext.current
 
+    var showPermissionRationale by remember { mutableStateOf(false) }
+    var showGpsRationale by remember { mutableStateOf(false) }
+
+    val gpsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+        if (locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
+            locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)) {
+            viewModel.updateLocationAndPrayers(true)
+            navController.navigate("prayer_times")
+        }
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val isCoarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         val isFineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
         if (isCoarseGranted || isFineGranted) {
-            viewModel.updateLocationAndPrayers()
+            clearDenialCount(context)
+            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+            val isGpsEnabled = locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
+                    locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
+            if (isGpsEnabled) {
+                viewModel.updateLocationAndPrayers(true)
+                navController.navigate("prayer_times")
+            } else {
+                showGpsRationale = true
+            }
+        } else {
+            incrementDenialCount(context)
         }
     }
 
     LaunchedEffect(Unit) {
-        val hasCoarse = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val hasFine = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        if (hasCoarse || hasFine) {
-            viewModel.updateLocationAndPrayers()
-        } else {
-            permissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        }
+        viewModel.updateLocationAndPrayers()
     }
 
     Scaffold(
@@ -142,7 +173,29 @@ fun HomeScreen(
                     FeatureGrid(
                         onNavigateToHijri = { navController.navigate("hijri_calendar") },
                         onNavigateToCalendar = { navController.navigate("gregorian_calendar") },
-                        onNavigateToSalah = { navController.navigate("prayer_times") },
+                        onNavigateToSalah = {
+                            val hasLocation = uiState.prayerTimes.isNotEmpty() && uiState.prayerTimes.first().time != "--:--"
+                            if (hasLocation) {
+                                navController.navigate("prayer_times")
+                            } else {
+                                val hasCoarse = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                                val hasFine = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                                
+                                if (hasCoarse || hasFine) {
+                                    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+                                    val isGpsEnabled = locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
+                                            locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
+                                    if (isGpsEnabled) {
+                                        viewModel.updateLocationAndPrayers(true)
+                                        navController.navigate("prayer_times")
+                                    } else {
+                                        showGpsRationale = true
+                                    }
+                                } else {
+                                    showPermissionRationale = true
+                                }
+                            }
+                        },
                         onNavigateToQibla = { navController.navigate("qibla") }
                     )
 
@@ -154,6 +207,36 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(32.dp))
                 }
+            }
+
+            if (showPermissionRationale) {
+                LocationPermissionBottomSheet(
+                    onDismiss = { showPermissionRationale = false },
+                    onAllowLocation = {
+                        if (getDenialCount(context) >= 2) {
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", context.packageName, null)
+                            }
+                            context.startActivity(intent)
+                        } else {
+                            permissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                )
+                            )
+                        }
+                    }
+                )
+            }
+
+            if (showGpsRationale) {
+                GpsRequirementBottomSheet(
+                    onDismiss = { showGpsRationale = false },
+                    onTurnOnGps = {
+                        gpsLauncher.launch(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                    }
+                )
             }
         }
     }

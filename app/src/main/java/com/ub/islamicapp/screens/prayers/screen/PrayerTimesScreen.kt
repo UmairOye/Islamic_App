@@ -86,7 +86,7 @@ fun PrayerTimesScreen(
                     )
                 }
                 Text(
-                    text = "Salah Times",
+                    text = stringResource(R.string.salah_times_title),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF1E293B)
@@ -177,7 +177,7 @@ fun PrayerTimesScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Today's Schedule",
+                text = stringResource(R.string.todays_schedule),
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
@@ -185,7 +185,7 @@ fun PrayerTimesScreen(
                 )
             )
             Text(
-                text = "View Calendar",
+                text = stringResource(R.string.view_calendar),
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.Medium,
                     color = PrimaryGreen
@@ -266,7 +266,7 @@ fun HeroSection(
                     .padding(horizontal = 16.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "UP NEXT",
+                    text = stringResource(R.string.up_next),
                     fontSize = 12.sp,
                     fontFamily = InterFontFamily,
                     fontWeight = FontWeight.SemiBold,
@@ -277,7 +277,7 @@ fun HeroSection(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = if (nextPrayer == "--") "Loading" else nextPrayer,
+                text = if (nextPrayer == "--") stringResource(R.string.loading) else nextPrayer,
 
                 fontSize = 30.sp,
                 fontFamily = InterFontFamily,
