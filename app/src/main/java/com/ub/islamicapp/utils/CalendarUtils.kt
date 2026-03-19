@@ -123,4 +123,8 @@ object CalendarUtils {
             return MonthData("Unknown", 0, 1445, emptyList())
         }
     }
+    fun getHijriMonthName(index: Int): String {
+        val monthNames = arrayOf("Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani", "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban", "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah")
+        return if (index in monthNames.indices) monthNames[index] else "Unknown"
+    }
 }
