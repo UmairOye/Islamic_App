@@ -6,7 +6,8 @@ data class CalendarDay(
     val dayOfMonth: Int,
     val gregorianDay: Int? = null,
     val isCurrentMonth: Boolean,
-    val isToday: Boolean
+    val isToday: Boolean,
+    val hasEvent: Boolean = false
 )
 
 data class MonthData(
@@ -98,7 +99,8 @@ object CalendarUtils {
                 val gregorianDay = gregorianDate.get(java.util.Calendar.DAY_OF_MONTH)
 
                 val isToday = (offsetMonths == 0 && i == todayHijri)
-                days.add(CalendarDay(i, gregorianDay, true, isToday))
+                val hasEvent = !IslamicEventsProvider.getEventForDate(targetMonth, i).isNullOrBlank()
+                days.add(CalendarDay(i, gregorianDay, true, isToday, hasEvent))
             }
 
             while (days.size % 7 != 0) {

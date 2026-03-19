@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ub.islamicapp.screens.home.viewmodel.PrayerTime
+import com.ub.islamicapp.domain.model.PrayerTime
 
 @Composable
 fun PrayerTimesRow(

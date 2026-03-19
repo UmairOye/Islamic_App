@@ -1,6 +1,6 @@
 package com.ub.islamicapp.screens.qibla.viewmodel
 
-import com.ub.islamicapp.screens.home.viewmodel.PrayerTime
+import com.ub.islamicapp.domain.model.PrayerTime
 
 data class QiblaUiState(
     val qiblaDirection: Float = 0f,

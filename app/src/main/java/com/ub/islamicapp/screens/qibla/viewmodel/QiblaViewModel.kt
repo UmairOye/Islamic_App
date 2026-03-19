@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ub.islamicapp.domain.location.LocationTracker
 import com.ub.islamicapp.domain.usecase.GetPrayerTimesUseCase
-import com.ub.islamicapp.screens.home.viewmodel.PrayerTime
+import com.ub.islamicapp.domain.model.PrayerTime
 import com.ub.islamicapp.screens.qibla.viewmodel.QiblaUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -66,12 +66,16 @@ class QiblaViewModel @Inject constructor(
                     qibla += 360f
                 }
 
+                // Instantly show the compass
+                _uiState.value = _uiState.value.copy(
+                    qiblaDirection = qibla,
+                    isLoadingLocation = false
+                )
+
                 val result = getPrayerTimesUseCase(location.latitude, location.longitude)
                 result.fold(
                     onSuccess = { prayerTimes ->
                         _uiState.value = _uiState.value.copy(
-                            qiblaDirection = qibla,
-                            isLoadingLocation = false,
                             locationName = prayerTimes.locationName,
                             prayerTimes = prayerTimes.prayers.map {
                                 PrayerTime(it.name, it.time, it.isCompleted)
@@ -80,10 +84,7 @@ class QiblaViewModel @Inject constructor(
                         )
                     },
                     onFailure = {
-                        _uiState.value = _uiState.value.copy(
-                            qiblaDirection = qibla,
-                            isLoadingLocation = false
-                        )
+                        // Already handled the compass update above
                     }
                 )
             } else {

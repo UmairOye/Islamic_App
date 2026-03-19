@@ -1,3 +1,47 @@
 <resources>
     <string name="app_name">Islamic App</string>
+    <string name="prayer_fajr">Fajr</string>
+    <string name="prayer_sunrise">Sunrise</string>
+    <string name="prayer_dhuhr">Dhuhr</string>
+    <string name="prayer_asr">Asr</string>
+    <string name="prayer_maghrib">Maghrib</string>
+    <string name="prayer_isha">Isha</string>
+    
+    <string name="current_location">Current Location</string>
+    <string name="unknown_location">Unknown Location</string>
+    <string name="unknown_date">Unknown Date</string>
+    
+    <string name="time_left_format">%1$s %2$d hour %3$d min left</string>
+    <string name="time_left_no_hours_format">%1$s %2$d min left</string>
+    <string name="time_left_empty_format">%1$s -- hour -- min left</string>
+    
+    <string name="hijri_date_format">%1$d %2$s %3$d H</string>
+    
+    <string name="month_muharram">Muharram</string>
+    <string name="month_safar">Safar</string>
+    <string name="month_rabi_al_awwal">Rabi\' al-Awwal</string>
+    <string name="month_rabi_al_thani">Rabi\' al-Thani</string>
+    <string name="month_jumada_al_awwal">Jumada al-Awwal</string>
+    <string name="month_jumada_al_thani">Jumada al-Thani</string>
+    <string name="month_rajab">Rajab</string>
+    <string name="month_shaban">Sha\'ban</string>
+    <string name="month_ramadan">Ramadan</string>
+    <string name="month_shawwal">Shawwal</string>
+    <string name="month_dhu_al_qidah">Dhu al-Qi\'dah</string>
+    <string name="month_dhu_al_hijjah">Dhu al-Hijjah</string>
+    <string name="error_location_turn_on">Turn on GPS to fetch prayer times</string>
+    <string name="error_location_required">GPS required for times</string>
+    <string name="cal_hijri_title">Hijri Calendar</string>
+    <string name="cal_gregorian_title">Gregorian Calendar</string>
+    <string name="cal_prev_month">Previous Month</string>
+    <string name="cal_next_month">Next Month</string>
+    <string name="cal_key_islamic_dates">Key Islamic Dates</string>
+    <string name="cal_upcoming">Upcoming</string>
+    <string name="cal_sun">SUN</string>
+    <string name="cal_mon">MON</string>
+    <string name="cal_tue">TUE</string>
+    <string name="cal_wed">WED</string>
+    <string name="cal_thu">THU</string>
+    <string name="cal_fri">FRI</string>
+    <string name="cal_sat">SAT</string>
 </resources>

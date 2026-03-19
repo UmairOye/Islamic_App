@@ -34,7 +34,7 @@ class DefaultLocationTracker @Inject constructor(
         val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
-        val canUseGps = hasAccessCoarseLocationPermission && hasAccessFineLocationPermission && isGpsEnabled
+        val canUseGps = (hasAccessCoarseLocationPermission || hasAccessFineLocationPermission) && isGpsEnabled
 
         if (canUseGps) {
             val location = suspendCancellableCoroutine<Location?> { cont ->

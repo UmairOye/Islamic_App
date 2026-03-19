@@ -2,12 +2,7 @@ package com.ub.islamicapp.screens.calendar.viewmodel
 
 import com.ub.islamicapp.utils.MonthData
 
-data class UpcomingEvent(
-    val day: String,
-    val month: String,
-    val title: String,
-    val subtitle: String
-)
+import com.ub.islamicapp.screens.calendar.model.UpcomingEvent
 
 data class CalendarUiState(
     val isHijri: Boolean = true,

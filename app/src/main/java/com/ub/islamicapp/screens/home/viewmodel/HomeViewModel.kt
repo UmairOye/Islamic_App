@@ -1,24 +1,31 @@
 package com.ub.islamicapp.screens.home.viewmodel
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ub.islamicapp.domain.location.LocationTracker
+import com.ub.islamicapp.domain.model.HijriDate
+import com.ub.islamicapp.domain.model.TimeRemaining
+import com.ub.islamicapp.data.datasource.RecentCityDao
+import com.ub.islamicapp.data.models.RecentCityEntity
 import com.ub.islamicapp.domain.usecase.GetPrayerTimesUseCase
-import com.ub.islamicapp.screens.home.viewmodel.HomeUiState
-import com.ub.islamicapp.screens.home.viewmodel.PrayerTime
 import dagger.hilt.android.lifecycle.HiltViewModel
-import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.Job
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val locationTracker: LocationTracker,
-    private val getPrayerTimesUseCase: GetPrayerTimesUseCase
+    private val getPrayerTimesUseCase: GetPrayerTimesUseCase,
+    private val recentCityDao: RecentCityDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -27,14 +34,23 @@ class HomeViewModel @Inject constructor(
     private var pollingJob: Job? = null
 
     init {
-
         startPollingTime()
+        fetchRecentCities()
+    }
+
+    private fun fetchRecentCities() {
+        viewModelScope.launch {
+            recentCityDao.getRecentCities().collect { cities ->
+                _uiState.update { it.copy(recentCities = cities) }
+            }
+        }
     }
 
     fun saveLocationAndFetchPrayers(lat: Double, lng: Double, cityName: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             locationTracker.saveManualLocation(lat, lng)
+            recentCityDao.insertRecentCity(RecentCityEntity(cityName, lat, lng, System.currentTimeMillis()))
             val result = getPrayerTimesUseCase(lat, lng)
             result.fold(
                 onSuccess = { prayerTimes ->
@@ -43,9 +59,7 @@ class HomeViewModel @Inject constructor(
                         currentTime = prayerTimes.currentTime,
                         hijriDate = prayerTimes.hijriDate,
                         timeRemaining = prayerTimes.timeRemaining,
-                        prayerTimes = prayerTimes.prayers.map {
-                            PrayerTime(it.name, it.time, it.isCompleted)
-                        },
+                        prayerTimes = prayerTimes.prayers,
                         nextPrayer = prayerTimes.nextPrayer,
                         isLoading = false
                     )
@@ -62,7 +76,6 @@ class HomeViewModel @Inject constructor(
 
     fun updateLocationAndPrayers(forceRefresh: Boolean = false) {
         viewModelScope.launch {
-
             if (!forceRefresh && _uiState.value.prayerTimes.isNotEmpty() && _uiState.value.prayerTimes.first().time != "--:--") {
                 return@launch
             }
@@ -79,9 +92,7 @@ class HomeViewModel @Inject constructor(
                             currentTime = prayerTimes.currentTime,
                             hijriDate = prayerTimes.hijriDate,
                             timeRemaining = prayerTimes.timeRemaining,
-                            prayerTimes = prayerTimes.prayers.map { 
-                                PrayerTime(it.name, it.time, it.isCompleted) 
-                            },
+                            prayerTimes = prayerTimes.prayers,
                             nextPrayer = prayerTimes.nextPrayer,
                             isLoading = false
                         )
@@ -94,23 +105,21 @@ class HomeViewModel @Inject constructor(
                     }
                 )
             } else {
-
-                val currentTimeStr = java.text.SimpleDateFormat("hh:mm", java.util.Locale.getDefault()).format(java.util.Calendar.getInstance().time)
-                val hijriStr = try {
+                val currentTimeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Calendar.getInstance().time)
+                val hijriObj = try {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                         val islamicCalendar = android.icu.util.IslamicCalendar()
                         val hDay = islamicCalendar.get(android.icu.util.IslamicCalendar.DAY_OF_MONTH)
                         val hMonth = islamicCalendar.get(android.icu.util.IslamicCalendar.MONTH)
                         val hYear = islamicCalendar.get(android.icu.util.IslamicCalendar.YEAR)
-                        val monthNames = arrayOf("Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani", "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban", "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah")
-                        "$hDay ${monthNames[hMonth]} $hYear H"
-                    } else "Unknown Date"
-                } catch (e: Exception) { "Unknown Date" }
+                        HijriDate(hDay, hMonth, hYear, null)
+                    } else HijriDate(0, 0, 0, "Unknown Date")
+                } catch (e: Exception) { HijriDate(0, 0, 0, "Unknown Date") }
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     currentTime = currentTimeStr,
-                    hijriDate = hijriStr,
+                    hijriDate = hijriObj,
                     error = "NO_LOCATION"
                 )
             }
@@ -121,12 +130,11 @@ class HomeViewModel @Inject constructor(
         pollingJob?.cancel()
         pollingJob = viewModelScope.launch {
             while (true) {
+                val cal = Calendar.getInstance()
+                val currentTimeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(cal.time)
 
-                val cal = java.util.Calendar.getInstance()
-                val currentTimeStr = java.text.SimpleDateFormat("hh:mm", java.util.Locale.getDefault()).format(cal.time)
-
-                val currentHour = cal.get(java.util.Calendar.HOUR_OF_DAY)
-                val currentMin = cal.get(java.util.Calendar.MINUTE)
+                val currentHour = cal.get(Calendar.HOUR_OF_DAY)
+                val currentMin = cal.get(Calendar.MINUTE)
                 val currentMillis = cal.timeInMillis
 
                 var newTimeRemaining = _uiState.value.timeRemaining
@@ -146,15 +154,15 @@ class HomeViewModel @Inject constructor(
                         foundNext = true
                         nextPrayerStr = prayer.name
 
-                        val pCal = java.util.Calendar.getInstance()
-                        pCal.set(java.util.Calendar.HOUR_OF_DAY, pHour)
-                        pCal.set(java.util.Calendar.MINUTE, pMin)
-                        pCal.set(java.util.Calendar.SECOND, 0)
+                        val pCal = Calendar.getInstance()
+                        pCal.set(Calendar.HOUR_OF_DAY, pHour)
+                        pCal.set(Calendar.MINUTE, pMin)
+                        pCal.set(Calendar.SECOND, 0)
 
                         val diff = pCal.timeInMillis - currentMillis
-                        val hoursRem = diff / (1000 * 60 * 60)
-                        val minsRem = (diff / (1000 * 60)) % 60
-                        newTimeRemaining = "${prayer.name} $hoursRem hour $minsRem min left"
+                        val hoursRem = (diff / (1000 * 60 * 60)).toInt()
+                        val minsRem = ((diff / (1000 * 60)) % 60).toInt()
+                        newTimeRemaining = TimeRemaining(prayer.name, hoursRem, minsRem)
                     }
 
                     prayer.copy(isCompleted = isCompleted)
@@ -167,16 +175,16 @@ class HomeViewModel @Inject constructor(
                     val pHour = parts[0].toInt()
                     val pMin = parts[1].toInt()
 
-                    val pCal = java.util.Calendar.getInstance()
-                    pCal.add(java.util.Calendar.DAY_OF_YEAR, 1)
-                    pCal.set(java.util.Calendar.HOUR_OF_DAY, pHour)
-                    pCal.set(java.util.Calendar.MINUTE, pMin)
-                    pCal.set(java.util.Calendar.SECOND, 0)
+                    val pCal = Calendar.getInstance()
+                    pCal.add(Calendar.DAY_OF_YEAR, 1)
+                    pCal.set(Calendar.HOUR_OF_DAY, pHour)
+                    pCal.set(Calendar.MINUTE, pMin)
+                    pCal.set(Calendar.SECOND, 0)
 
                     val diff = pCal.timeInMillis - currentMillis
-                    val hoursRem = diff / (1000 * 60 * 60)
-                    val minsRem = (diff / (1000 * 60)) % 60
-                    newTimeRemaining = "${firstPrayer.name} $hoursRem hour $minsRem min left"
+                    val hoursRem = (diff / (1000 * 60 * 60)).toInt()
+                    val minsRem = ((diff / (1000 * 60)) % 60).toInt()
+                    newTimeRemaining = TimeRemaining(firstPrayer.name, hoursRem, minsRem)
                 }
 
                 _uiState.value = _uiState.value.copy(

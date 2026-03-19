@@ -17,7 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.ub.islamicapp.screens.home.viewmodel.PrayerTime
+import com.ub.islamicapp.domain.model.PrayerTime
 import com.ub.islamicapp.theme.PrimaryGreen
 
 @Composable

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ub.islamicapp.utils.CalendarUtils
 import com.ub.islamicapp.utils.IslamicEventsProvider
+import com.ub.islamicapp.screens.calendar.model.UpcomingEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +33,10 @@ class CalendarViewModel @Inject constructor() : ViewModel() {
 
     fun selectDay(day: Int) {
         _uiState.update { it.copy(selectedDay = day) }
+        viewModelScope.launch {
+            val upcomingEvents = fetchUpcomingEvents(_uiState.value.isHijri, _uiState.value.monthData.monthIndex, day)
+            _uiState.update { it.copy(upcomingEvents = upcomingEvents) }
+        }
     }
 
     private fun loadMonthData(offset: Int) {
@@ -46,7 +51,7 @@ class CalendarViewModel @Inject constructor() : ViewModel() {
             val todayCell = monthData.days.find { it.isToday }
             val selectedDay = todayCell?.dayOfMonth ?: -1
 
-            val upcomingEvents = fetchUpcomingEvents(isHijri, monthData.monthIndex)
+            val upcomingEvents = fetchUpcomingEvents(isHijri, monthData.monthIndex, if (selectedDay > 0) selectedDay else 1)
 
             _uiState.update {
                 it.copy(
@@ -58,38 +63,35 @@ class CalendarViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    private fun fetchUpcomingEvents(isHijri: Boolean, currentMonthIndex: Int): List<UpcomingEvent> {
+    private fun fetchUpcomingEvents(isHijri: Boolean, currentMonthIndex: Int, startDay: Int): List<UpcomingEvent> {
         val events = mutableListOf<UpcomingEvent>()
         if (!isHijri) return events
 
-        val todayCell = _uiState.value.monthData.days.find { it.isToday }
-        val currentDay = todayCell?.dayOfMonth ?: 1
+        val maxDaysToScan = 10
+        var daysScanned = 0
+        var currentScanDay = startDay
+        var currentScanMonth = currentMonthIndex
 
-        for (day in currentDay..30) {
-            val desc = IslamicEventsProvider.getEventForDate(currentMonthIndex, day)
+        while (daysScanned < maxDaysToScan) {
+            val desc = IslamicEventsProvider.getEventForDate(currentScanMonth, currentScanDay)
             if (!desc.isNullOrBlank()) {
                 val shortTitle = desc.split(" ").take(3).joinToString(" ")
                 events.add(UpcomingEvent(
-                    day = String.format("%02d", day),
-                    month = CalendarUtils.getHijriMonthName(currentMonthIndex),
+                    day = String.format("%02d", currentScanDay),
+                    month = CalendarUtils.getHijriMonthName(currentScanMonth),
                     title = shortTitle,
                     subtitle = desc
                 ))
             }
-        }
 
-        val nextMonthIndex = (currentMonthIndex + 1) % 12
-        for (day in 1..30) {
-            if (events.size >= 10) break
-            val desc = IslamicEventsProvider.getEventForDate(nextMonthIndex, day)
-            if (!desc.isNullOrBlank()) {
-                val shortTitle = desc.split(" ").take(3).joinToString(" ")
-                events.add(UpcomingEvent(
-                    day = String.format("%02d", day),
-                    month = CalendarUtils.getHijriMonthName(nextMonthIndex),
-                    title = shortTitle,
-                    subtitle = desc
-                ))
+            daysScanned++
+            currentScanDay++
+
+            // Hijri months alternate between 29 and 30 days, but for simplicity in this logic
+            // Assuming 30 as a safe boundary.
+            if (currentScanDay > 30) {
+                currentScanDay = 1
+                currentScanMonth = (currentScanMonth + 1) % 12
             }
         }
 

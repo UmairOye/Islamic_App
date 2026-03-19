@@ -2,14 +2,17 @@ package com.ub.islamicapp.data.repository
 
 import android.app.Application
 import android.location.Geocoder
+import android.os.Build
+import com.ub.islamicapp.domain.model.HijriDate
 import com.ub.islamicapp.domain.model.PrayerTime
 import com.ub.islamicapp.domain.model.PrayerTimes
+import com.ub.islamicapp.domain.model.TimeRemaining
 import com.ub.islamicapp.domain.repository.PrayerRepository
 import com.ub.islamicapp.utils.PrayerTimeCalculator
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -31,14 +34,14 @@ class PrayerRepositoryImpl @Inject constructor(
 
         val times = PrayerTimeCalculator.getPrayerTimes(year, month, day, latitude, longitude, timeZone)
 
-        var locName = "Current Location"
+        var locName: String? = null
         val distThreshold = 0.001
 
         if (cachedLat != null && cachedLng != null &&
             Math.abs(cachedLat!! - latitude) < distThreshold &&
             Math.abs(cachedLng!! - longitude) < distThreshold &&
             cachedLocationName != null) {
-            locName = cachedLocationName!!
+            locName = cachedLocationName
         } else {
             try {
                 locName = withContext(Dispatchers.IO) {
@@ -49,16 +52,15 @@ class PrayerRepositoryImpl @Inject constructor(
                         val city = address.locality ?: address.subAdminArea ?: ""
                         val country = address.countryName ?: ""
                         if (city.isNotEmpty() && country.isNotEmpty()) "$city, $country" else city.ifEmpty { country }
-                    } else {
-                        "Current Location"
-                    }
+                    } else null
                 }
-                cachedLat = latitude
-                cachedLng = longitude
-                cachedLocationName = locName
+                if (locName != null) {
+                    cachedLat = latitude
+                    cachedLng = longitude
+                    cachedLocationName = locName
+                }
             } catch (e: Exception) {
-                e.printStackTrace()
-                locName = cachedLocationName ?: "Current Location"
+                locName = cachedLocationName
             }
         }
 
@@ -69,8 +71,7 @@ class PrayerRepositoryImpl @Inject constructor(
         val prayers = mutableListOf<PrayerTime>()
 
         var nextPrayerStr = ""
-        var timeRemainingStr = ""
-
+        var timeRemaining: TimeRemaining? = null
         var foundNext = false
         val currentMillis = calendar.timeInMillis
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
@@ -99,9 +100,9 @@ class PrayerRepositoryImpl @Inject constructor(
                 pCal.set(Calendar.MINUTE, pMin)
 
                 val diff = pCal.timeInMillis - currentMillis
-                val hoursRem = diff / (1000 * 60 * 60)
-                val minsRem = (diff / (1000 * 60)) % 60
-                timeRemainingStr = "$name $hoursRem hour $minsRem min left"
+                val hoursRem = (diff / (1000 * 60 * 60)).toInt()
+                val minsRem = ((diff / (1000 * 60)) % 60).toInt()
+                timeRemaining = TimeRemaining(name, hoursRem, minsRem)
             }
         }
 
@@ -120,39 +121,31 @@ class PrayerRepositoryImpl @Inject constructor(
                 pCal.set(Calendar.MINUTE, pMin)
 
                 val diff = pCal.timeInMillis - currentMillis
-                val hoursRem = diff / (1000 * 60 * 60)
-                val minsRem = (diff / (1000 * 60)) % 60
-                timeRemainingStr = "Fajr $hoursRem hour $minsRem min left"
-            } else {
-                timeRemainingStr = "Fajr -- hour -- min left"
+                val hoursRem = (diff / (1000 * 60 * 60)).toInt()
+                val minsRem = ((diff / (1000 * 60)) % 60).toInt()
+                timeRemaining = TimeRemaining("Fajr", hoursRem, minsRem)
             }
         }
 
-        val hijriDateStr = try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        val hijriDate = try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 val islamicCalendar = android.icu.util.IslamicCalendar()
                 val hDay = islamicCalendar.get(android.icu.util.IslamicCalendar.DAY_OF_MONTH)
                 val hMonth = islamicCalendar.get(android.icu.util.IslamicCalendar.MONTH)
                 val hYear = islamicCalendar.get(android.icu.util.IslamicCalendar.YEAR)
-
-                val monthNames = arrayOf(
-                    "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
-                    "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
-                    "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
-                )
-                "$hDay ${monthNames[hMonth]} $hYear H"
+                HijriDate(hDay, hMonth, hYear, null)
             } else {
-                "Unknown Hijri Date"
+                HijriDate(0, 0, 0, null)
             }
         } catch (e: Exception) {
-            "Unknown Hijri Date"
+             HijriDate(0, 0, 0, null)
         }
 
         return PrayerTimes(
-            locationName = locName,
-            hijriDate = hijriDateStr,
+            locationName = locName ?: "",
+            hijriDate = hijriDate,
             currentTime = currentTimeStr,
-            timeRemaining = timeRemainingStr,
+            timeRemaining = timeRemaining,
             prayers = prayers,
             nextPrayer = nextPrayerStr
         )
@@ -169,12 +162,12 @@ class PrayerRepositoryImpl @Inject constructor(
                     val country = address.countryName ?: ""
                     if (city.isNotEmpty() && country.isNotEmpty()) "$city, $country" else city.ifEmpty { country }
                 } else {
-                    "Unknown Location"
+                    ""
                 }
             }
-            emit(locName)
+            emit(locName ?: "")
         } catch (e: Exception) {
-            emit("Unknown Location")
+            emit("")
         }
     }
 }

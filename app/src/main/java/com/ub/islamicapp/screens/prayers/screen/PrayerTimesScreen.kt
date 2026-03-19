@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.compose.ui.res.stringResource
 import com.ub.islamicapp.R
 import com.ub.islamicapp.screens.home.viewmodel.HomeViewModel
 import com.ub.islamicapp.theme.InterFontFamily
@@ -118,10 +119,50 @@ fun PrayerTimesScreen(
             }
         }
 
+        val hijriStr = uiState.hijriDate?.let { date ->
+            if (date.fallbackString != null) {
+                date.fallbackString
+            } else {
+                val monthName = when (date.monthIndex) {
+                    0 -> stringResource(R.string.month_muharram)
+                    1 -> stringResource(R.string.month_safar)
+                    2 -> stringResource(R.string.month_rabi_al_awwal)
+                    3 -> stringResource(R.string.month_rabi_al_thani)
+                    4 -> stringResource(R.string.month_jumada_al_awwal)
+                    5 -> stringResource(R.string.month_jumada_al_thani)
+                    6 -> stringResource(R.string.month_rajab)
+                    7 -> stringResource(R.string.month_shaban)
+                    8 -> stringResource(R.string.month_ramadan)
+                    9 -> stringResource(R.string.month_shawwal)
+                    10 -> stringResource(R.string.month_dhu_al_qidah)
+                    11 -> stringResource(R.string.month_dhu_al_hijjah)
+                    else -> ""
+                }
+                stringResource(R.string.hijri_date_format, date.day, monthName, date.year)
+            }
+        } ?: stringResource(R.string.unknown_date)
+
+        val timeRemStr = uiState.timeRemaining?.let { tr ->
+            val pName = when (tr.prayerName) {
+                "Fajr" -> stringResource(R.string.prayer_fajr)
+                "Sunrise" -> stringResource(R.string.prayer_sunrise)
+                "Dhuhr" -> stringResource(R.string.prayer_dhuhr)
+                "Asr" -> stringResource(R.string.prayer_asr)
+                "Maghrib" -> stringResource(R.string.prayer_maghrib)
+                "Isha" -> stringResource(R.string.prayer_isha)
+                else -> tr.prayerName
+            }
+            if (tr.hours > 0) {
+                stringResource(R.string.time_left_format, pName, tr.hours, tr.minutes)
+            } else {
+                stringResource(R.string.time_left_no_hours_format, pName, tr.minutes)
+            }
+        } ?: "--"
+
         HeroSection(
             nextPrayer = uiState.nextPrayer,
-            timeRemaining = uiState.timeRemaining,
-            hijriDate = uiState.hijriDate,
+            timeRemaining = timeRemStr,
+            hijriDate = hijriStr,
             location = uiState.location,
             prayerTimes = uiState.prayerTimes
         )
@@ -176,7 +217,7 @@ fun HeroSection(
     timeRemaining: String,
     hijriDate: String,
     location: String,
-    prayerTimes: List<com.ub.islamicapp.screens.home.viewmodel.PrayerTime>
+    prayerTimes: List<com.ub.islamicapp.domain.model.PrayerTime>
 ) {
 
     var nextPrayerTimeStr = ""

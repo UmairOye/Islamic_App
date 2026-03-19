@@ -6,10 +6,12 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import androidx.room.Room
 import com.ub.islamicapp.data.datasource.AppDatabase
 import com.ub.islamicapp.data.datasource.LocationDao
+import com.ub.islamicapp.data.datasource.RecentCityDao
 import com.ub.islamicapp.data.location.DefaultLocationTracker
 import com.ub.islamicapp.data.repository.PrayerRepositoryImpl
 import com.ub.islamicapp.domain.location.LocationTracker
 import com.ub.islamicapp.domain.repository.PrayerRepository
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,7 +29,9 @@ object AppModule {
             app,
             AppDatabase::class.java,
             "islamic_app_db"
-        ).build()
+        )
+        .fallbackToDestructiveMigration()
+        .build()
     }
 
     @Provides
@@ -44,17 +48,24 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideLocationTracker(
-        fusedLocationProviderClient: FusedLocationProviderClient,
-        locationDao: LocationDao,
-        application: Application
-    ): LocationTracker {
-        return DefaultLocationTracker(fusedLocationProviderClient, locationDao, application)
+    fun provideRecentCityDao(db: AppDatabase): RecentCityDao {
+        return db.recentCityDao()
     }
+}
 
-    @Provides
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+
+    @Binds
     @Singleton
-    fun providePrayerRepository(application: Application): PrayerRepository {
-        return PrayerRepositoryImpl(application)
-    }
+    abstract fun bindLocationTracker(
+        defaultLocationTracker: DefaultLocationTracker
+    ): LocationTracker
+
+    @Binds
+    @Singleton
+    abstract fun bindPrayerRepository(
+        prayerRepositoryImpl: PrayerRepositoryImpl
+    ): PrayerRepository
 }

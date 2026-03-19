@@ -19,8 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.rounded.LocationOff
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
 import com.ub.islamicapp.R
-import com.ub.islamicapp.screens.home.viewmodel.PrayerTime
+import com.ub.islamicapp.domain.model.PrayerTime
 
 @Composable
 fun HomeTopHeader(
@@ -74,7 +75,7 @@ fun HomeTopHeader(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "Turn on GPS to fetch prayer times",
+                                text = stringResource(R.string.error_location_turn_on),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.8f)
                             )
@@ -103,7 +104,7 @@ fun HomeTopHeader(
 
             if (isLocationError) {
                 Text(
-                    text = "GPS required for times",
+                    text = stringResource(R.string.error_location_required),
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White.copy(alpha = 0.9f)
                 )
@@ -124,7 +125,13 @@ fun HomeTopHeader(
                         .padding(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    val placeholderNames = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+                    val placeholderNames = listOf(
+                        stringResource(R.string.prayer_fajr),
+                        stringResource(R.string.prayer_dhuhr),
+                        stringResource(R.string.prayer_asr),
+                        stringResource(R.string.prayer_maghrib),
+                        stringResource(R.string.prayer_isha)
+                    )
                     placeholderNames.forEach { name ->
                         PrayerItem(prayer = PrayerTime(name, "--:--", false), isNext = false)
                     }

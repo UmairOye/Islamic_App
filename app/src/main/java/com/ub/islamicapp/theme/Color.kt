@@ -17,3 +17,11 @@ val TextSecondaryLight = Color(0xFF757575)
 
 val TextPrimaryDark = Color(0xFFE0E0E0)
 val TextSecondaryDark = Color(0xFFA0A0A0)
+
+val ThemeLightGreenBg = Color(0xFFEAF5F0)
+val ThemeDarkGreenIcon = Color(0xFF1E8F6A)
+val ThemeLightOrangeBg = Color(0xFFFFF4E5)
+val ThemeDarkOrangeIcon = Color(0xFFD97706)
+val ThemeGrayText = Color(0xFF64748B)
+val ThemeDivider = Color(0xFFF1F5F9)
+val ThemeButtonBg = Color(0xFFF4F6F8)
