@@ -29,12 +29,10 @@ class PrayerRepositoryImpl @Inject constructor(
         val day = calendar.get(Calendar.DAY_OF_MONTH)
         val timeZone = TimeZone.getDefault().getOffset(System.currentTimeMillis()) / (1000.0 * 60 * 60)
 
-        // Calculate Prayer Times
         val times = PrayerTimeCalculator.getPrayerTimes(year, month, day, latitude, longitude, timeZone)
 
-        // Location Info (with caching to avoid repeated Geocoder network calls every minute)
         var locName = "Current Location"
-        val distThreshold = 0.001 // roughly 100 meters
+        val distThreshold = 0.001
 
         if (cachedLat != null && cachedLng != null &&
             Math.abs(cachedLat!! - latitude) < distThreshold &&
@@ -64,11 +62,10 @@ class PrayerRepositoryImpl @Inject constructor(
             }
         }
 
-        // Current time format (keep domain logic internally consistent, format for UI later or alongside)
         val timeFormat24 = SimpleDateFormat("HH:mm", Locale.getDefault())
         val currentTimeStr = timeFormat24.format(calendar.time)
 
-        val prayerNamesOrder = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+        val prayerNamesOrder = listOf("Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha")
         val prayers = mutableListOf<PrayerTime>()
 
         var nextPrayerStr = ""
@@ -93,7 +90,7 @@ class PrayerRepositoryImpl @Inject constructor(
             val isCompleted = (currentHour > pHour) || (currentHour == pHour && currentMin >= pMin)
             prayers.add(PrayerTime(name = name, time = timeStr, isCompleted = isCompleted))
 
-            if (!isCompleted && !foundNext) {
+            if (!isCompleted && !foundNext && name != "Sunrise") {
                 foundNext = true
                 nextPrayerStr = name
 
@@ -108,7 +105,6 @@ class PrayerRepositoryImpl @Inject constructor(
             }
         }
 
-        // Handle case where all prayers today are completed (next is Fajr tomorrow)
         if (!foundNext) {
             nextPrayerStr = "Fajr"
             val fajrTimeStr = times["Fajr"] ?: "--:--"
@@ -132,7 +128,6 @@ class PrayerRepositoryImpl @Inject constructor(
             }
         }
 
-        // Hijri Date Formatting
         val hijriDateStr = try {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                 val islamicCalendar = android.icu.util.IslamicCalendar()
