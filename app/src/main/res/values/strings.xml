@@ -1,3 +1,45 @@
 <resources>
     <string name="app_name">Islamic App</string>
+    <string name="salah_times">Salah Times</string>
+    <string name="back">Back</string>
+    <string name="notifications">Notifications</string>
+    <string name="location">Location</string>
+    <string name="up_next">UP NEXT</string>
+    <string name="loading">Loading</string>
+    <string name="time_remaining">Time remaining</string>
+    <string name="todays_schedule">Today\'s Schedule</string>
+    <string name="view_calendar">View Calendar</string>
+
+    <string name="hijri_calendar">Hijri Calendar</string>
+    <string name="gregorian_calendar">Gregorian Calendar</string>
+    <string name="previous_month">Previous Month</string>
+    <string name="next_month">Next Month</string>
+    <string name="key_islamic_dates">Key Islamic Dates</string>
+    <string name="upcoming">Upcoming</string>
+
+    <string name="qibla_direction">Qibla Direction</string>
+    <string name="device_no_sensor">Your device doesn\'t support compass sensors required for Qibla direction.</string>
+    <string name="prayer_icon">Prayer Icon</string>
+    <string name="prayer_suffix">%1$s Prayer</string>
+    <string name="local_time">LOCAL TIME</string>
+    <string name="near_me">Near Me</string>
+    <string name="device_orientation">Device Orientation</string>
+    <string name="keep_device_flat">Keep your device flat</string>
+
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="notification_permission_required">Notification Permission Required</string>
+    <string name="notification_permission_desc">Please allow notification permission to receive Adhan and reminder alerts for prayer times.</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="select_location">Select Location</string>
+    <string name="location_permission_required">Location Permission Required</string>
+    <string name="location_permission_desc">We need your location to calculate accurate prayer times and Qibla direction based on astronomical formulas.</string>
+    <string name="current_location">Current Location</string>
+    <string name="detect_my_current_location">Detect My Current Location</string>
+    <string name="detecting_location">Detecting Location...</string>
+    <string name="search_city">Search city...</string>
+    <string name="search">Search</string>
+    <string name="popular_cities">Popular Cities</string>
+
 </resources>

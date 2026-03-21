@@ -5,4 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocationTracker {
     suspend fun getCurrentLocation(): Location?
+    suspend fun getCachedLocation(): Location?
+    suspend fun saveManualLocation(lat: Double, lng: Double)
 }

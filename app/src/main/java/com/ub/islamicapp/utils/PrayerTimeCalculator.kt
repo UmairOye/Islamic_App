@@ -11,12 +11,10 @@ import kotlin.math.*
  */
 object PrayerTimeCalculator {
 
-    // Calculation Method Parameters (University of Islamic Sciences, Karachi - Standard for Pakistan)
     private const val FAJR_ANGLE = 18.0
     private const val ISHA_ANGLE = 18.0
 
-    // Asr Juristic Method (Hanafi - Standard for Pakistan)
-    private const val ASR_FACTOR = 2.0 // Shadow ratio
+    private const val ASR_FACTOR = 2.0
 
     private fun dsin(d: Double): Double = sin(Math.toRadians(d))
     private fun dcos(d: Double): Double = cos(Math.toRadians(d))
@@ -36,6 +34,15 @@ object PrayerTimeCalculator {
         var hour = a - 24.0 * floor(a / 24.0)
         hour = if (hour < 0) hour + 24.0 else hour
         return hour
+    }
+
+    private fun dtime(d: Double): DoubleArray {
+        var d1 = d
+        if (d1.isNaN()) return doubleArrayOf(Double.NaN, Double.NaN)
+        d1 = fixHour(d1 + 0.5 / 60.0)
+        val hours = floor(d1)
+        val minutes = floor((d1 - hours) * 60.0)
+        return doubleArrayOf(hours, minutes)
     }
 
     /**
@@ -95,10 +102,9 @@ object PrayerTimeCalculator {
         val dec = sunDeclination(jd + (time - timeZone) / 24.0)
         val eqt = equationOfTime(jd + (time - timeZone) / 24.0)
 
-        // Dhuhr (transit time)
         val noon = 12 + timeZone - (lng / 15.0) - eqt
 
-        if (angle == 0.0 && !isAsr) { // Dhuhr case
+        if (angle == 0.0 && !isAsr) {
             return noon
         }
 
@@ -109,7 +115,7 @@ object PrayerTimeCalculator {
         } else {
             val cosH = (dsin(angle) - dsin(lat) * dsin(dec)) / (dcos(lat) * dcos(dec))
             if (cosH < -1 || cosH > 1) {
-                // Sun never reaches this angle
+
                 return Double.NaN
             }
             v = 1.0 / 15.0 * darccos(cosH)
@@ -132,40 +138,54 @@ object PrayerTimeCalculator {
     ): Map<String, String> {
         val jd = calculateJulianDate(year, month, day) - longitude / (15.0 * 24.0)
 
-        // Iterative refinement to improve accuracy
         var fajr = 5.0
         var sunrise = 6.0
         var dhuhr = 12.0
-        var asr = 15.0
+        var asr = 13.0
         var sunset = 18.0
         var maghrib = 18.0
-        var isha = 19.5
+        var isha = 18.0
 
-        for (i in 0 until 1) { // 1 iteration is usually enough
-            dhuhr = computeTime(0.0, dhuhr, latitude, longitude, jd, timeZone)
-            fajr = computeTime(-FAJR_ANGLE, fajr, latitude, longitude, jd, timeZone, isSunrise = true)
-            sunrise = computeTime(-0.833, sunrise, latitude, longitude, jd, timeZone, isSunrise = true) // 0.833 for Sun refraction and semidiameter
-            asr = computeTime(0.0, asr, latitude, longitude, jd, timeZone, isAsr = true)
-            sunset = computeTime(-0.833, sunset, latitude, longitude, jd, timeZone)
-            maghrib = sunset // Maghrib is essentially sunset in most methods, some add a few minutes, we'll use exact sunset.
-            isha = computeTime(-ISHA_ANGLE, isha, latitude, longitude, jd, timeZone)
+        for (i in 0 until 1) {
+            val t = doubleArrayOf(fajr, sunrise, dhuhr, asr, sunset, maghrib, isha)
+
+            dhuhr = computeTime(0.0, t[2], latitude, longitude, jd, timeZone)
+            fajr = computeTime(-FAJR_ANGLE, t[0], latitude, longitude, jd, timeZone, isSunrise = true)
+            sunrise = computeTime(-0.833, t[1], latitude, longitude, jd, timeZone, isSunrise = true)
+            asr = computeTime(0.0, t[3], latitude, longitude, jd, timeZone, isAsr = true)
+            sunset = computeTime(-0.833, t[4], latitude, longitude, jd, timeZone)
+            maghrib = computeTime(-0.833, t[5], latitude, longitude, jd, timeZone)
+            isha = computeTime(-ISHA_ANGLE, t[6], latitude, longitude, jd, timeZone)
+        }
+
+        for (i in 0 until 2) {
+            val t = doubleArrayOf(fajr, sunrise, dhuhr, asr, sunset, maghrib, isha)
+
+            dhuhr = computeTime(0.0, t[2], latitude, longitude, jd, timeZone)
+            fajr = computeTime(-FAJR_ANGLE, t[0], latitude, longitude, jd, timeZone, isSunrise = true)
+            sunrise = computeTime(-0.833, t[1], latitude, longitude, jd, timeZone, isSunrise = true)
+            asr = computeTime(0.0, t[3], latitude, longitude, jd, timeZone, isAsr = true)
+            sunset = computeTime(-0.833, t[4], latitude, longitude, jd, timeZone)
+            maghrib = computeTime(-0.833, t[5], latitude, longitude, jd, timeZone)
+            isha = computeTime(-ISHA_ANGLE, t[6], latitude, longitude, jd, timeZone)
         }
 
         return mapOf(
             "Fajr" to formatTime(fajr),
+            "Sunrise" to formatTime(sunrise),
             "Dhuhr" to formatTime(dhuhr),
             "Asr" to formatTime(asr),
-            "Maghrib" to formatTime(maghrib),
+            "Maghrib" to formatTime(maghrib + (3.0 / 60.0)),
             "Isha" to formatTime(isha)
         )
     }
 
     private fun formatTime(time: Double): String {
         if (time.isNaN()) return "--:--"
-        var t = fixHour(time + 0.5 / 60.0) // Add 0.5 minute to round up
+        var t = fixHour(time + 0.5 / 60.0)
         val hours = floor(t).toInt()
         val minutes = floor((t - hours) * 60).toInt()
-        // Return 24-hour format so domain logic can compare correctly
+
         return String.format("%02d:%02d", hours, minutes)
     }
 }
